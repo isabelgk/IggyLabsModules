@@ -1,1 +1,3 @@
-# IggyLabs-VCV
+# IggyLabsModules
+
+Modules for VCV Rack
