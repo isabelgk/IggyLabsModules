@@ -1,0 +1,16 @@
+{
+  "slug": "IggyLabsModules",
+  "name": "Iggy Labs",
+  "version": "1.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "Iggy Labs",
+  "author": "Isabel Kaspriskie",
+  "authorEmail": "ikaspriskie@gmail.com",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "https://github.com/isabelgk/IggyLabsModules",
+  "donateUrl": "https://www.buymeacoffee.com/iggylabs",
+  "changelogUrl": "",
+  "modules": []
+}
