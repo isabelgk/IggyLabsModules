@@ -1,8 +1,10 @@
 // Minimal wavetable oscillator by IggyLabs
+
 #include "plugin.hpp"
 #include "osdialog.h"
 #include <vector>
 
+#define DR_WAV_IMPLEMENTATION
 #include "../lib/dr_wav.h"
 
 
@@ -38,18 +40,16 @@ struct Table : Module {
 
 
 	void loadWavetable(std::string path) {
-		// unsigned int channels;
-		// unsigned int sampleRate;
-		// drwav_uint64 totalSampleCount;
+		unsigned int channels;
+		unsigned int sampleRate;
+		drwav_uint64 totalSampleCount;
 
-		// float* sampleData;
-		// sampleData = drwav_open_and_read_file_f32(path.c_str(), &channels, &sampleRate, &totalSampleCount);
+		float* sampleData;
+		sampleData = drwav_open_and_read_file_f32(path.c_str(), &channels, &sampleRate, &totalSampleCount);
 	
-		// if (sampleData != NULL) {
+		if (sampleData != NULL) {
 
-		// }
-		DEBUG("%s", path);
-
+		}
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -77,9 +77,9 @@ struct SetFrameSizeChildMenu : MenuItem {
 		for (int i = 0; i < 4; i++) {
 			SetFrameSizeItem* item = new SetFrameSizeItem;
 			item->text = string::f("%d", module->frameSizes[i]);
-			// item->rightText = CHECKMARK(module->frameSize == module->frameSizes[i]);
+			item->rightText = CHECKMARK(module->frameSize == module->frameSizes[i]);
 			item->module = module;
-			item->frameSize = 1;
+			item->frameSize = module->frameSizes[i];
 			menu->addChild(item);
 		}
 
