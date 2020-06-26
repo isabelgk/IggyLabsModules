@@ -31,7 +31,7 @@ struct IlKnobL : RoundKnob {
 };
 
 struct IlKnobXL : RoundKnob {
-    IlKnobL() {
+    IlKnobXL() {
         setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/knob_xl.svg")));
     }
 };
