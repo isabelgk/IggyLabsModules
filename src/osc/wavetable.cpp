@@ -78,7 +78,7 @@ struct Wavetable {
         int framePosLeft = (int) n;
         if (framePosLeft == frameSize - 1) { 
             // End of frame, so wrap to beginning
-            int framePosRight = (int) 0   
+            int framePosRight = (int) 0;
         } else {
             int framePosRight = framePosLeft + 1;
         }
