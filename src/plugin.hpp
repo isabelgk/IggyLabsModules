@@ -9,9 +9,15 @@ using namespace rack;
 extern Plugin* pluginInstance;
 
 // Widget overrides
-struct IlKnob : RoundKnob {
-    IlKnob() {
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/knob.svg")));
+struct IlKnob16 : RoundKnob {
+    IlKnob16() {
+        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/knob_16px.svg")));
+    }
+};
+
+struct IlKnob19 : RoundKnob {
+    IlKnob19() {
+        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/knob_19px.svg")));
     }
 };
 
