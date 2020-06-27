@@ -1,4 +1,4 @@
-// Plugins for VCV Rack by IggyLabs
+// Plugins for VCV Rack by iggy.labs
 
 #pragma once
 #include <rack.hpp>

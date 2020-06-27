@@ -1,10 +1,9 @@
-// Minimal wavetable oscillator by IggyLabs
+// Minimal wavetable oscillator by iggy.labs
 
 #include "plugin.hpp"
 #include "osdialog.h"
 #include <vector>
 #include "osc/wavetable.cpp"
-
 
 
 struct Table : Module {
@@ -28,20 +27,72 @@ struct Table : Module {
 		NUM_LIGHTS
 	};
 
+
+	Wavetable::Table* wavetable = nullptr;
+	Wavetable::Oscillator oscillator[16];  // Maximum 16 channels of polyphony
+
+
 	Table() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-	}
 
-	Wavetable* wavetable = nullptr;
+		configParam(Table::POS_PARAM, 0.0f, 1.0f, 0.0f, "Wavetable position");
+		configParam(Table::FREQ_PARAM, -3.0f, 3.0f, 0.0f, "Coarse");
+		configParam(Table::FINE_PARAM, -0.5f, 0.5f, 0.0f, "Fine");
+
+		wavetable = new Wavetable::Table();
+
+		// Assign the same wavetable to all oscillators
+		for (int i = 0; i < 16; i++) {
+			oscillator[i].table = wavetable;
+		}
+	}
 
 
 	void loadWavetable(std::string path) {
-		wavetable = new Wavetable();
+		wavetable = new Wavetable::Table();
 		wavetable->loadWavetable(path);
 	}
 
-	void process(const ProcessArgs& args) override {
 
+	void process(const ProcessArgs& args) override {
+		int numChannels = std::max(1, inputs[FREQ_INPUT].getChannels());
+		outputs[OUTPUT].setChannels(numChannels);
+
+		for (int c = 0; c < 1; c++) {
+			if (wavetable == nullptr) {
+				outputs[OUTPUT].setVoltage(0.f, c);
+			} else if (wavetable->loading) {
+				outputs[OUTPUT].setVoltage(0.f, c);
+			} else {
+				// Set pitch
+				float pitch = params[FREQ_PARAM].getValue();
+				if (inputs[FREQ_INPUT].isConnected()) {
+					pitch += inputs[FREQ_INPUT].getPolyVoltage(c);
+				}
+				pitch += params[FINE_PARAM].getValue();
+				if (inputs[FINE_INPUT].isConnected()) {
+					pitch += inputs[FINE_INPUT].getPolyVoltage(c) / 5.f;
+				}
+				pitch = clamp(pitch, -3.5f, 3.5f);
+				oscillator[c].setPitch(pitch, args.sampleRate);
+
+				// Set position (in terms of frame/cycle) in wavetable
+				float pos = params[POS_PARAM].getValue();
+				if (inputs[POS_INPUT].isConnected()) {
+					pos += inputs[POS_INPUT].getPolyVoltage(c) / 10.f;
+					pos = clamp(pos, 0.f, 1.f);
+				}
+
+				// Step forward in the table
+				oscillator[c].step();
+
+				// Get sample
+				float out = oscillator[c].getSample(pos);
+
+				// Send out
+				outputs[OUTPUT].setVoltage(out, c);
+			}
+		}
 	}
 
 	// Save CPU by processing certain parameters less frequently

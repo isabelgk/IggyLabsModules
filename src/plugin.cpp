@@ -1,3 +1,5 @@
+// Plugins for VCV Rack by iggy.labs
+
 #include "plugin.hpp"
 
 
