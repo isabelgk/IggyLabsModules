@@ -27,10 +27,8 @@ struct Table : Module {
 		NUM_LIGHTS
 	};
 
-
 	Wavetable::Table* wavetable = nullptr;
 	Wavetable::Oscillator oscillator[16];  // Maximum 16 channels of polyphony
-
 
 	Table() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -39,18 +37,20 @@ struct Table : Module {
 		configParam(Table::FREQ_PARAM, -3.0f, 3.0f, 0.0f, "Coarse");
 		configParam(Table::FINE_PARAM, -0.5f, 0.5f, 0.0f, "Fine");
 
+		// This needs to exist for the child menu to get possible frame sizes for now
+		// even though it will get overwritten when you load a real file.
 		wavetable = new Wavetable::Table();
-
-		// Assign the same wavetable to all oscillators
-		for (int i = 0; i < 16; i++) {
-			oscillator[i].table = wavetable;
-		}
 	}
 
 
-	void loadWavetable(std::string path) {
+	void loadWavetable(std::string path, int frameSize) {
+
 		wavetable = new Wavetable::Table();
-		wavetable->loadWavetable(path);
+		wavetable->loadWavetable(path, frameSize);
+
+		for (int i = 0; i < 16; i++) {
+			oscillator[i].table = wavetable;
+		}
 	}
 
 
@@ -101,25 +101,29 @@ struct Table : Module {
 	}
 };
 
-struct SetFrameSizeItem : MenuItem {
+struct LoadFileItem : MenuItem {
 	Table* module;
 	int frameSize;
 	void onAction(const event::Action& e) override {
 		if (module->wavetable != nullptr) {
-			module->wavetable->setFrameSize(frameSize);
+			char* path = osdialog_file(OSDIALOG_OPEN, NULL, NULL, NULL);
+			if (path) {
+				module->loadWavetable(path, frameSize);
+				free(path);
+			}
 		}
 	}
 };
 
-struct SetFrameSizeChildMenu : MenuItem {
+struct LoadFileMenu : MenuItem {
 	Table* module;
 	Menu* createChildMenu() override {
 		Menu* menu = new Menu;
 		for (int i = 0; i < 4; i++) {
-			SetFrameSizeItem* item = new SetFrameSizeItem;
+			LoadFileItem* item = new LoadFileItem;
 			std::vector<int> frameSizes = module->wavetable->frameSizes;
 
-			item->text = string::f("%d", frameSizes[i]);
+			item->text = string::f("%d samples/cycle", frameSizes[i]);
 			item->rightText = CHECKMARK(module->wavetable->frameSize == frameSizes[i]);
 			item->module = module;
 			item->frameSize = frameSizes[i];
@@ -127,18 +131,6 @@ struct SetFrameSizeChildMenu : MenuItem {
 		}
 
 		return menu;
-	}
-};
-
-struct LoadWavetableItem : MenuItem {
-	Table* module;
-	
-	void onAction(const event::Action &e) override {
-		char* path = osdialog_file(OSDIALOG_OPEN, NULL, NULL, NULL);
-		if (path) {
-			module->loadWavetable(path);
-			free(path);
-		}
 	}
 };
 
@@ -170,15 +162,15 @@ struct TableWidget : ModuleWidget {
 		Table* module = dynamic_cast<Table*>(this->module);
 
 		menu->addChild(new MenuEntry);
-		LoadWavetableItem* sampleDirItem = new LoadWavetableItem;
-		sampleDirItem->text = "Load wavetable";
-		sampleDirItem->module = module;
-		menu->addChild(sampleDirItem);
+		// LoadWavetableItem* sampleDirItem = new LoadWavetableItem;
+		// sampleDirItem->text = "Load wavetable";
+		// sampleDirItem->module = module;
+		// menu->addChild(sampleDirItem);
 
-		SetFrameSizeChildMenu* frameSizeMenu = new SetFrameSizeChildMenu;
-		frameSizeMenu->text = "Set frame size";
-		frameSizeMenu->module = module;
-		menu->addChild(frameSizeMenu);
+		LoadFileMenu* loadFileMenu = new LoadFileMenu;
+		loadFileMenu->text = "Load wavetable";
+		loadFileMenu->module = module;
+		menu->addChild(loadFileMenu);
 	}
 };
 

@@ -4,40 +4,30 @@
 #define DR_WAV_IMPLEMENTATION
 #include "../../lib/dr_wav.h"
 
+#define MAX_FRAME_COUNT 256
 
 namespace Wavetable {
 
-    static const int maxFrameCount = 256;
-
     struct Table {
-        // Wavetable::Table - The lookup table based on a waveform
-
         // A wavetable has N frames where each frame/cycle contains M samples
-        float lookupTable[maxFrameCount][2048] = {{0}};  // Possible optimization for memory here
+        float lookupTable[MAX_FRAME_COUNT][2048] = {{0}};  // Possible optimization for memory here
 
-        // Default to having 256 samples in a frame
-        int frameSize = 256;  // Frame (cycle) length in number of samples
+        int frameSize = 2048;  // Frame (cycle) length in number of samples
         const std::vector<int> frameSizes{ 256, 512, 1024, 2048 };
 
-        int frameCount = maxFrameCount;  // wavetable size, N
-
+        int frameCount = MAX_FRAME_COUNT;  // wavetable size, N
         bool loading = false;
 
 
-        void setFrameSize(int fs) {
+        void loadWavetable(std::string path, int fs) {
             // Only update `frameSize` if the frame size is valid.
             for (int i = 0; i < (int) frameSizes.size(); i++) {
                 if (fs == frameSizes[i]) {
                     frameSize = fs;
                 }
             }
-        }
 
-
-        void loadWavetable(std::string path) {
             // Load the file
-            // std::vector<float> buffer = loadWavFile(path);
-
             std::vector<float> buffer;
             unsigned int channels;
             unsigned int sampleRate;
@@ -62,8 +52,8 @@ namespace Wavetable {
                 frameCount = totalSampleCount / frameSize;
 
                 // Cut off the wavetable if there are too many samples
-                if (frameCount > maxFrameCount) {
-                    frameCount = maxFrameCount;
+                if (frameCount > MAX_FRAME_COUNT) {
+                    frameCount = MAX_FRAME_COUNT;
                 }
 
             }
@@ -79,7 +69,7 @@ namespace Wavetable {
         }
 
 
-        float getSample(float frameIndex, float n) {
+        float getSample(float frameIndex, float framePos) {
             // To get the sample, we have to interpolate in two dimensions:
             //     1) within the frame itself
             //     2) between frames in the table
@@ -96,21 +86,21 @@ namespace Wavetable {
             }
 
             // Position in the frame
-            int framePosLeft = (int) n;
-            int framePosRight;
+            int framePosLeft = (int) framePos;
+            int framePosRight = 0;
             if (framePosLeft == frameSize - 1) { 
                 // End of frame, so wrap to beginning
                 framePosRight = (int) 0;
             } else {
                 framePosRight = framePosLeft + 1;
             }
-            float framePosFrac = n - (float) framePosLeft;
+            float framePosFrac = framePos - (float) framePosLeft;
 
             // Position in the table
             float tablePos = frameIndex * (frameCount - 1);  // [0..tableSize]
             int tablePosBottom = floor(tablePos);
             int tablePosTop = ceil(tablePos);
-            float tablePosFrac = tablePos - tablePosBottom;  // [0..1]
+            float tablePosFrac = tablePos - (float) tablePosBottom;  // [0..1]
 
             // Look up nearest samples
             float bottomLeft = lookupTable[tablePosBottom][framePosLeft];
@@ -130,39 +120,30 @@ namespace Wavetable {
 
     struct Oscillator {
         // Wavetable::Oscillator - Oscillator using a lookup table
-        Table* table;
+        Wavetable::Table* table = nullptr;
 
-        float currentIndex = 0.f;
+        float currentFramePos = 0.f;
         float stepSize = 0.f;
-        
-        float phase = 0.f;
-        float freq = 0.f;
-        
-        float prevPitch = 90000.f;
-
-
-        Oscillator() {
-            table = new Table();
-        }
-
 
         void setPitch(float pitch, float sampleRate) {
-            if (pitch != prevPitch) {
-                float frequency = dsp::FREQ_C4 * dsp::approxExp2_taylor5(pitch + 30) / 1073741824;
-
-                // https://en.wikibooks.org/wiki/Sound_Synthesis_Theory/Oscillators_and_Wavetables#Using_wavetables
-                // S = N * \frac{f}{F_s}
-                stepSize = table->frameCount * frequency / sampleRate;
-                prevPitch = pitch;
+            if (table == nullptr) {
+                return;
             }
+
+            // float frequency = dsp::FREQ_C4 * dsp::approxExp2_taylor5(pitch + 30) / 1073741824;
+            float frequency = dsp::FREQ_C4 * powf(2.0f, pitch);
+
+            // https://en.wikibooks.org/wiki/Sound_Synthesis_Theory/Oscillators_and_Wavetables#Using_wavetables
+            // S = N * \frac{f}{F_s}
+            stepSize = table->frameSize * frequency / sampleRate;
         }
 
 
-        float getSample(float y) {
+        float getSample(float frameIndex) {
             if (table == nullptr) {
                 return 0.f;
             } else {
-                return table->getSample(y, currentIndex);
+                return table->getSample(frameIndex, currentFramePos);
             }
         }
 
@@ -172,18 +153,16 @@ namespace Wavetable {
                 return;
             }
 
-            if (!table->loading) {
-                currentIndex += stepSize;
+            currentFramePos += stepSize;
+            
+            if (currentFramePos >= table->frameSize) {
+                // > It is important to note that because the step size is being altered, the read pointer may not
+                // > land exactly on the final table value N, and so it must "wrap around" in the same fashion as the
+                // > functionally generated waveforms in the earlier section. This can be done by subtracting the size
+                // > of the table from the current pointer value if it exceeds N
+                // https://en.wikibooks.org/wiki/Sound_Synthesis_Theory/Oscillators_and_Wavetables#Using_wavetables
                 
-                if (currentIndex >= table->frameCount) {
-                    // > It is important to note that because the step size is being altered, the read pointer may not
-                    // > land exactly on the final table value N, and so it must "wrap around" in the same fashion as the
-                    // > functionally generated waveforms in the earlier section. This can be done by subtracting the size
-                    // > of the table from the current pointer value if it exceeds N
-                    // https://en.wikibooks.org/wiki/Sound_Synthesis_Theory/Oscillators_and_Wavetables#Using_wavetables
-                    
-                    currentIndex -= table->frameCount;
-                }
+                currentFramePos -= table->frameSize;
             }
         }
     };
