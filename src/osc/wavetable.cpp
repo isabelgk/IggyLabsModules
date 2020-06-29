@@ -49,9 +49,16 @@ namespace Wavetable {
                 totalSampleCount = buffer.size();
                 drwav_free(sampleData);
 
-                frameCount = totalSampleCount / frameSize;
+                // It is possible that the buffer has fewer samples than the frame size
+                if (totalSampleCount < (drwav_uint64) frameSize) {
+                    frameSize = frameCount;
+                    frameCount = 1;
+                } else {
+                    frameCount = totalSampleCount / frameSize;
+                }
 
-                // Cut off the wavetable if there are too many samples
+                // Cut off the wavetable if we populate more than the maximum allowed
+                // number of frames
                 if (frameCount > MAX_FRAME_COUNT) {
                     frameCount = MAX_FRAME_COUNT;
                 }

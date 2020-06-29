@@ -58,7 +58,7 @@ struct Table : Module {
 		int numChannels = std::max(1, inputs[FREQ_INPUT].getChannels());
 		outputs[OUTPUT].setChannels(numChannels);
 
-		for (int c = 0; c < 1; c++) {
+		for (int c = 0; c < numChannels; c++) {
 			if (wavetable == nullptr) {
 				outputs[OUTPUT].setVoltage(0.f, c);
 			} else if (wavetable->loading) {
@@ -97,7 +97,7 @@ struct Table : Module {
 
 	// Save CPU by processing certain parameters less frequently
 	void slowerProcess() {
-
+		
 	}
 };
 
