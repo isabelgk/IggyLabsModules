@@ -147,9 +147,15 @@ struct TableWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		// Knobs
+<<<<<<< HEAD
 		addParam(createParamCentered<IlKnobS>(mm2px(Vec(5.1, 46.0)), module, Table::POS_PARAM));
 		addParam(createParamCentered<IlKnobS>(mm2px(Vec(5.1, 68.0)), module, Table::FINE_PARAM));
 		addParam(createParamCentered<IlKnobS>(mm2px(Vec(5.1, 90.0)), module, Table::FREQ_PARAM));
+=======
+		addParam(createParamCentered<IlKnob19>(mm2px(Vec(5.1, 46.0)), module, Table::POS_PARAM));
+		addParam(createParamCentered<IlKnob19>(mm2px(Vec(5.1, 68.0)), module, Table::FINE_PARAM));
+		addParam(createParamCentered<IlKnob19>(mm2px(Vec(5.1, 90.0)), module, Table::FREQ_PARAM));
+>>>>>>> 5cdf294177e559d7448e4021d766eba2f455abc7
 
 		// Inputs
 		addInput(createInputCentered<IlPort>(mm2px(Vec(5.1, 57.0)), module, Table::POS_INPUT));
@@ -164,6 +170,14 @@ struct TableWidget : ModuleWidget {
 		Table* module = dynamic_cast<Table*>(this->module);
 
 		menu->addChild(new MenuEntry);
+<<<<<<< HEAD
+=======
+		// LoadWavetableItem* sampleDirItem = new LoadWavetableItem;
+		// sampleDirItem->text = "Load wavetable";
+		// sampleDirItem->module = module;
+		// menu->addChild(sampleDirItem);
+
+>>>>>>> 5cdf294177e559d7448e4021d766eba2f455abc7
 		LoadFileMenu* loadFileMenu = new LoadFileMenu;
 		loadFileMenu->text = "Load wavetable";
 		loadFileMenu->module = module;

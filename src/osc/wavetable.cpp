@@ -42,7 +42,7 @@ namespace Wavetable {
                 buffer.clear();
 
                 // Read the first audio channel only
-                for (drwav_uint64 i = 0; i < totalSampleCount; i = i + channels) {
+                for (unsigned int i = 0; i < totalSampleCount; i = i + channels) {
                     buffer.push_back(sampleData[i]);
                 }
 
