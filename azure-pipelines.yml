@@ -135,11 +135,11 @@ stages:
         - task: GitHubRelease@0
           displayName: "Update Github Release"
           inputs:
-            gitHubConnection: github.com_IggyLabs
-            repositoryName: IggyLabs/IggyLabsModules
-            action: edit
-            tag: AzureCI
+            gitHubConnection: 'IggyLabs'
+            repositoryName: 'IggyLabs/IggyLabsModules'
+            action: 'edit'
             target: '$(Build.SourceVersion)'
+            tag: 'AzureCI'
+            releaseNotesFile: '$(Build.ArtifactStagingDirectory)/ReleaseNotes.md'
+            assets: '$(Build.ArtifactStagingDirectory)/*.zip'
             addChangeLog: false
-            releaseNotesFile: $(Build.ArtifactStagingDirectory)/ReleaseNotes.md
-            assets: $(Build.ArtifactStagingDirectory)/*.zip
