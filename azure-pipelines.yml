@@ -135,7 +135,7 @@ stages:
         - task: GitHubRelease@0
           displayName: "Update Github Release"
           inputs:
-            gitHubConnection: 'IggyLabs'
+            gitHubConnection: 'github.com_iggylabs'
             repositoryName: 'IggyLabs/IggyLabsModules'
             action: 'edit'
             target: '$(Build.SourceVersion)'
