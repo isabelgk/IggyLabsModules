@@ -135,8 +135,8 @@ stages:
         - task: GitHubRelease@0
           displayName: "Update Github Release"
           inputs:
-            gitHubConnection: github.com_AriaSalvatrice
-            repositoryName: AriaSalvatrice/AriaVCVModules
+            gitHubConnection: github.com_IggyLabs
+            repositoryName: IggyLabs/IggyLabsModules
             action: edit
             tag: AzureCI
             target: '$(Build.SourceVersion)'
