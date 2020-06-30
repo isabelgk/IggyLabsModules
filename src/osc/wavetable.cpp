@@ -12,12 +12,14 @@ namespace Wavetable {
         // A wavetable has N frames where each frame/cycle contains M samples
         float lookupTable[MAX_FRAME_COUNT][2048] = {{0}};  // Possible optimization for memory here
 
+        std::string lastPath = "";
+
         int frameSize = 2048;  // Frame (cycle) length in number of samples
         const std::vector<int> frameSizes{ 256, 512, 1024, 2048 };
 
         int frameCount = MAX_FRAME_COUNT;  // wavetable size, N
         bool loading = false;
-
+        bool loaded = false;
 
         void loadWavetable(std::string path, int fs) {
             // Only update `frameSize` if the frame size is valid.
@@ -39,6 +41,7 @@ namespace Wavetable {
             sampleData = drwav_open_and_read_file_f32(path.c_str(), &channels, &sampleRate, &totalSampleCount);
 
             if (sampleData != NULL) {
+                lastPath = path.c_str();
                 buffer.clear();
 
                 // Read the first audio channel only
@@ -73,6 +76,7 @@ namespace Wavetable {
             }
 
             loading = false;
+            loaded = true;
         }
 
 

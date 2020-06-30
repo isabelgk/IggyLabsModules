@@ -26,6 +26,7 @@ struct Table : Module {
 		NUM_OUTPUTS
 	};
 	enum LightIds {
+		LOADED_LIGHT,
 		NUM_LIGHTS
 	};
 
@@ -45,6 +46,7 @@ struct Table : Module {
 	}
 
 
+
 	void loadWavetable(std::string path, int frameSize) {
 
 		wavetable = new Wavetable::Table();
@@ -60,10 +62,15 @@ struct Table : Module {
 		int numChannels = std::max(1, inputs[FREQ_INPUT].getChannels());
 		outputs[OUTPUT].setChannels(numChannels);
 
+		if (wavetable == nullptr || !wavetable->loaded) {
+			lights[LOADED_LIGHT].setBrightness(0.f);
+		} else {
+			lights[LOADED_LIGHT].setBrightness(1.f);
+		}
+		
+
 		for (int c = 0; c < numChannels; c++) {
-			if (wavetable == nullptr) {
-				outputs[OUTPUT].setVoltage(0.f, c);
-			} else if (wavetable->loading) {
+			if (wavetable == nullptr || wavetable->loading) {
 				outputs[OUTPUT].setVoltage(0.f, c);
 			} else {
 				// Set pitch
@@ -100,6 +107,27 @@ struct Table : Module {
 	// Save CPU by processing certain parameters less frequently
 	void slowerProcess() {
 		
+	}
+
+	json_t* dataToJson() override {
+		json_t* rootJ = json_object();
+
+		json_object_set_new(rootJ, "lastPath", json_string(wavetable->lastPath.c_str()));
+		json_object_set_new(rootJ, "lastFrameSize", json_integer(wavetable->frameSize));
+
+		return rootJ; 
+	}
+
+	void dataFromJson(json_t* rootJ) override {
+		json_t* lastPathJ = json_object_get(rootJ, "lastPath");
+		json_t* lastFrameSizeJ = json_object_get(rootJ, "lastFrameSize");
+
+		if (lastPathJ && lastFrameSizeJ) {
+			std::string lastPath = json_string_value(lastPathJ);
+			int lastFrameSize = json_integer_value(lastFrameSizeJ);
+
+			loadWavetable(lastPath, lastFrameSize);
+		}
 	}
 };
 
@@ -145,6 +173,9 @@ struct TableWidget : ModuleWidget {
 		// Screws
 		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+
+		// Lights
+		addChild(createLightCentered<SmallLight<WhiteLight>>(mm2px(Vec(5.1, 39.0)), module, Table::LOADED_LIGHT));
 
 		// Knobs
 		addParam(createParamCentered<IlKnobS>(mm2px(Vec(5.1, 46.0)), module, Table::POS_PARAM));
