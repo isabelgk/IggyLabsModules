@@ -141,8 +141,8 @@ namespace Wavetable {
                 return;
             }
 
-            // float frequency = dsp::FREQ_C4 * dsp::approxExp2_taylor5(pitch + 30) / 1073741824;
-            float frequency = dsp::FREQ_C4 * powf(2.0f, pitch);
+            // float frequency = dsp::FREQ_C4 * powf(2.0f, pitch);
+            float frequency = dsp::approxExp2_taylor5(pitch + dsp::FREQ_C4);
 
             // https://en.wikibooks.org/wiki/Sound_Synthesis_Theory/Oscillators_and_Wavetables#Using_wavetables
             // S = N * \frac{f}{F_s}

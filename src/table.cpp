@@ -32,6 +32,8 @@ struct Table : Module {
 
 	Wavetable::Table* wavetable = nullptr;
 	Wavetable::Oscillator oscillator[16];  // Maximum 16 channels of polyphony
+	int currentPolyphony = 1;
+	int loopCounter = 0;
 
 	Table() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -57,19 +59,25 @@ struct Table : Module {
 		}
 	}
 
-
-	void process(const ProcessArgs& args) override {
-		int numChannels = std::max(1, inputs[FREQ_INPUT].getChannels());
-		outputs[OUTPUT].setChannels(numChannels);
+	// Save CPU by processing certain parameters less frequently
+	void slowerProcess(const ProcessArgs& args) {
+		currentPolyphony = std::max(1, inputs[FREQ_INPUT].getChannels());
+		outputs[OUTPUT].setChannels(currentPolyphony);
 
 		if (wavetable == nullptr || !wavetable->loaded) {
 			lights[LOADED_LIGHT].setBrightness(0.f);
 		} else {
 			lights[LOADED_LIGHT].setBrightness(1.f);
 		}
-		
+	}
 
-		for (int c = 0; c < numChannels; c++) {
+	void process(const ProcessArgs& args) override {
+		if (loopCounter-- == 0) {
+			loopCounter = 8;
+			slowerProcess(args);
+		}
+
+		for (int c = 0; c < currentPolyphony; c++) {
 			if (wavetable == nullptr || wavetable->loading) {
 				outputs[OUTPUT].setVoltage(0.f, c);
 			} else {
@@ -104,10 +112,6 @@ struct Table : Module {
 		}
 	}
 
-	// Save CPU by processing certain parameters less frequently
-	void slowerProcess() {
-		
-	}
 
 	json_t* dataToJson() override {
 		json_t* rootJ = json_object();
