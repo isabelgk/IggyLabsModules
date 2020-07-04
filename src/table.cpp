@@ -2,6 +2,8 @@
 
 #include "plugin.hpp"
 #include "osdialog.h"
+#include <array>
+#include <string>
 #include <vector>
 
 #include "widgets.hpp"
@@ -30,7 +32,7 @@ struct Table : Module {
 		NUM_LIGHTS
 	};
 
-	std::array<Wavetable::Wavetable*, 16> wavetables = {new Wavetable::Wavetable()};  // Maximum 16 channels of polyphony
+	std::array<Wavetable::Wavetable*, 16> wavetables;  // Maximum 16 channels of polyphony
 	int currentPolyphony = 1;
 	int loopCounter = 0;
 
