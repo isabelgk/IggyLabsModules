@@ -1,10 +1,10 @@
 // Minimal wavetable oscillator by iggy.labs
 
-#include "plugin.hpp"
-#include "osdialog.h"
 #include <array>
 #include <string>
 #include <vector>
+#include "plugin.hpp"
+#include "osdialog.h"
 
 #include "widgets.hpp"
 #include "osc/wavetable.cpp"
@@ -42,6 +42,10 @@ struct Table : Module {
 		configParam(Table::POS_PARAM, 0.0f, 1.0f, 0.0f, "Wavetable position");
 		configParam(Table::FREQ_PARAM, -3.0f, 3.0f, 0.0f, "Coarse");
 		configParam(Table::FINE_PARAM, -0.5f, 0.5f, 0.0f, "Fine");
+
+		for (int i = 0; i < 16; i++) {
+			wavetables[i] = new Wavetable::Wavetable();
+		}
 	}
 
 
@@ -85,9 +89,9 @@ struct Table : Module {
 					pitch += inputs[FINE_INPUT].getPolyVoltage(c) / 5.f;
 				}
 				pitch = clamp(pitch, -3.5f, 3.5f);
-				wavetables[c]->setPitch(pitch, args.sampleRate);
+				// wavetables[c]->setPitch(pitch, args.sampleRate);
 
-				// Set position (in terms of frame/cycle) in wavetable
+				// Set position in wavetable (which cycle to access)
 				float pos = params[POS_PARAM].getValue();
 				if (inputs[POS_INPUT].isConnected()) {
 					pos += inputs[POS_INPUT].getPolyVoltage(c) / 10.f;
@@ -98,7 +102,7 @@ struct Table : Module {
 				wavetables[c]->updatePhase();
 
 				// Get sample
-				float out = wavetables[c]->getSample((int) floor(pos));
+				float out = wavetables[c]->getSample(pos, pitch, args.sampleRate) * 5.f;
 
 				// Send out
 				outputs[OUTPUT].setVoltage(out, c);

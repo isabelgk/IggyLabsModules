@@ -17,14 +17,16 @@ namespace Wavetable {
 
     struct Wavetable {
         std::string lastPath;
+        std::array<std::array<double, MAX_CYCLE_LENGTH>, MAX_CYCLE_COUNT> cycleBuffers;
 
         int cycleLength;
         int numCycles;
-        int cycleIndex;
-        std::array<std::array<double, MAX_CYCLE_LENGTH>, MAX_CYCLE_COUNT> cycleBuffers;
 
         bool loading = false;
         bool loaded = false;
+
+        double mPhasor = 0.f;     // phase accumulator
+        double mPhaseInc = 0.f;   // phase incremenet
 
         // To create multiple positions for a 2D wavetable voice, 
         // make a single WaveTableOsc for each possible cycle.
@@ -36,7 +38,6 @@ namespace Wavetable {
             lastPath = "";
             cycleLength = MAX_CYCLE_LENGTH;
             numCycles = 1;
-            cycleIndex = 0;
             loading = false;
             loaded = false;
         }
@@ -95,30 +96,33 @@ namespace Wavetable {
             loaded = true;
         }
 
-        // TODO - Improve performance by only changing some of the oscillators' frequencies?
-        // TODO - Morph between wavetable indices by using fractional cycle index
-        // Frequency in units of Hertz
-        void setFrequency(double freq, double sampleRate) {
-            for (int i = 0; i < numCycles; i++) {
-                wavetableOscillators[i]->SetFrequency(freq / sampleRate);
-            }
-        }
-
-        void setPitch(double pitch, double sampleRate) {
-            double freq = dsp::FREQ_C4 * powf(2.0f, pitch);
-            setFrequency(freq, sampleRate);
-        }
-
         void updatePhase() {
-            for (int i = 0; i < numCycles; i++) {
-                wavetableOscillators[i]->UpdatePhase();
+            mPhasor += mPhaseInc;
+
+            if (mPhasor >= 1.0) {
+                mPhasor -= 1.0;
             }
         }
 
-        // TODO - Morph between wavetable indices by using fractional cycle index
-        // Returns the output of the selected cycle's wavetable oscillator
-        float getSample(int cycleIndex) {
-            return wavetableOscillators[cycleIndex]->GetOutput();
+        float getSample(float cycleIndex, double pitch, double sampleRate) {
+            double freq = dsp::FREQ_C4 * powf(2.0f, pitch);
+            mPhaseInc = freq / sampleRate;
+
+            // if (numCycles == 1) {
+            //     return wavetableOscillators[0]->GetSample(mPhasor, freq, sampleRate);
+            // }
+
+            float tablePos = cycleIndex * (numCycles - 1);  // [0..tableSize]
+            int tablePosBottom = floor(tablePos);
+            int tablePosTop = ceil(tablePos);
+            float tablePosFrac = tablePos - (float) tablePosBottom;  // [0..1]
+
+            float above = wavetableOscillators[tablePosTop]->GetSample(mPhasor, freq, sampleRate);
+            float below = wavetableOscillators[tablePosBottom]->GetSample(mPhasor, freq, sampleRate);
+
+            // Linear interpolation
+            return below + tablePosFrac * (above - below);
+
         }
     };
     

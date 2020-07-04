@@ -1,5 +1,7 @@
 //  WaveTableOsc.h
 //
+// Modified by Isabel Kaspriskie - July 2020
+//
 //  Created by Nigel Redmon on 2018-10-05
 //  EarLevel Engineering: earlevel.com
 //  Copyright 2018 Nigel Redmon
@@ -51,29 +53,6 @@ public:
         mCurWaveTable = curWaveTable;
     }
 
-    // SetPhaseOffset: Phase offset for PWM, 0-1
-    //
-    void SetPhaseOffset(double offset) {
-        mPhaseOfs = offset;
-    }
-
-    // UpdatePhase: Call once per sample
-    //
-    void UpdatePhase(void) {
-        mPhasor += mPhaseInc;
-
-        if (mPhasor >= 1.0)
-            mPhasor -= 1.0;
-    }
-
-
-    // Process: Update phase and get output
-    //
-    float Process(void) {
-        UpdatePhase();
-        return GetOutput();
-    }
-
 
     // GetOutput: Returns the current oscillator output
     //
@@ -89,37 +68,11 @@ public:
         return samp0 + (samp1 - samp0) * fracPart;
     }
 
+    float GetSample(double phasor, double freq, double sampleRate) {
+        SetFrequency(freq / sampleRate);
+        mPhasor = phasor;
 
-    // getOutputMinusOffset
-    //
-    // for variable pulse width: initialize to sawtooth,
-    // set phaseOfs to duty cycle, use this for osc output
-    //
-    // returns the current oscillator output
-    //
-    float GetOutputMinusOffset() {
-        waveTable *waveTable = &mWaveTables[mCurWaveTable];
-        int len = waveTable->waveTableLen;
-        float *wave = waveTable->waveTable;
-
-        // linear
-        float temp = mPhasor * len;
-        int intPart = temp;
-        float fracPart = temp - intPart;
-        float samp0 = wave[intPart];
-        float samp1 = wave[intPart+1];
-        float samp = samp0 + (samp1 - samp0) * fracPart;
-
-        // and linear again for the offset part
-        float offsetPhasor = mPhasor + mPhaseOfs;
-        if (offsetPhasor > 1.0)
-            offsetPhasor -= 1.0;
-        temp = offsetPhasor * len;
-        intPart = temp;
-        fracPart = temp - intPart;
-        samp0 = wave[intPart];
-        samp1 = wave[intPart+1];
-        return samp - (samp0 + (samp1 - samp0) * fracPart);
+        return GetOutput();
     }
 
 
@@ -151,7 +104,6 @@ public:
 protected:
     double mPhasor = 0.0;       // phase accumulator
     double mPhaseInc = 0.0;     // phase increment
-    double mPhaseOfs = 0.5;     // phase offset for PWM
 
     // array of wavetables
     int mCurWaveTable = 0;      // current table, based on current frequency
