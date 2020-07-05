@@ -1,19 +1,17 @@
 # IggyLabsModules
 
- [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Azure build Status](https://dev.azure.com/IggyLabs/IggyLabsModules/_apis/build/status/IggyLabs.IggyLabsModules?branchName=master)](https://dev.azure.com/IggyLabs/IggyLabsModules/_build/latest?definitionId=1&branchName=master)
 
-## Manuals
 
-[Documentation](https://github.com/IggyLabs/IggyLabsModules/blob/master/doc/manual.md)
-
-## Modules for VCV Rack
+## Modules
 
 - **Table**: 2hp user wavetable oscillator
 
-## In the VCV library
+## Wiki
 
-*TODO*
+Available [here](https://github.com/IggyLabs/IggyLabsModules/wiki/Home/)
+
 
 ## Azure CI builds
 
