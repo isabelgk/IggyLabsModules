@@ -9,4 +9,4 @@
 
 ## Modules
 
-See the [wiki](https://github.com/IggyLabs/IggyLabsModules/wiki)
+See the [wiki](https://github.com/IggyLabs/IggyLabsModules/wiki/Manual)
