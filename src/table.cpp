@@ -115,7 +115,7 @@ struct Table : Module {
 
 	void dataFromJson(json_t* rootJ) override {
 		json_t* lastPathJ = json_object_get(rootJ, "lastPath");
-		json_t* lastFrameSizeJ = json_object_get(rootJ, "lastFrameSize");
+		json_t* lastFrameSizeJ = json_object_get(rootJ, "lastCycleLength");
 
 		if (lastPathJ && lastFrameSizeJ) {
 			std::string lastPath = json_string_value(lastPathJ);
@@ -130,12 +130,15 @@ struct LoadFileItem : MenuItem {
 	Table* module;
 	int cycleLength;
 	void onAction(const event::Action& e) override {
-		if (module->wavetable != nullptr) {
-			char* path = osdialog_file(OSDIALOG_OPEN, NULL, NULL, NULL);
+
+		if (module->wavetables[0] != nullptr) {
+			osdialog_filters* filters = osdialog_filters_parse(".wav files:wav");
+			char* path = osdialog_file(OSDIALOG_OPEN, NULL, NULL, filters);
 			if (path) {
 				module->loadWavetable(path, cycleLength);
 				free(path);
 			}
+			osdialog_filters_free(filters);
 		}
 	}
 };
