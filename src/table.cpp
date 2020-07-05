@@ -1,8 +1,10 @@
 // Minimal wavetable oscillator by iggy.labs
 
+#include <array>
+#include <string>
+#include <vector>
 #include "plugin.hpp"
 #include "osdialog.h"
-#include <vector>
 
 #include "widgets.hpp"
 #include "osc/wavetable.cpp"
@@ -30,8 +32,7 @@ struct Table : Module {
 		NUM_LIGHTS
 	};
 
-	Wavetable::Table* wavetable = nullptr;
-	Wavetable::Oscillator oscillator[16];  // Maximum 16 channels of polyphony
+	std::array<Wavetable::Wavetable*, 16> wavetables;  // Maximum 16 channels of polyphony
 	int currentPolyphony = 1;
 	int loopCounter = 0;
 
@@ -42,20 +43,17 @@ struct Table : Module {
 		configParam(Table::FREQ_PARAM, -3.0f, 3.0f, 0.0f, "Coarse");
 		configParam(Table::FINE_PARAM, -0.5f, 0.5f, 0.0f, "Fine");
 
-		// This needs to exist for the child menu to get possible frame sizes for now
-		// even though it will get overwritten when you load a real file.
-		wavetable = new Wavetable::Table();
+		for (int i = 0; i < 16; i++) {
+			wavetables[i] = new Wavetable::Wavetable();
+		}
 	}
 
 
 
-	void loadWavetable(std::string path, int frameSize) {
-
-		wavetable = new Wavetable::Table();
-		wavetable->loadWavetable(path, frameSize);
-
+	void loadWavetable(std::string path, int cycleLength) {
 		for (int i = 0; i < 16; i++) {
-			oscillator[i].table = wavetable;
+			wavetables[i] = new Wavetable::Wavetable();
+			wavetables[i]->loadWavetable(path, cycleLength);
 		}
 	}
 
@@ -64,7 +62,7 @@ struct Table : Module {
 		currentPolyphony = std::max(1, inputs[FREQ_INPUT].getChannels());
 		outputs[OUTPUT].setChannels(currentPolyphony);
 
-		if (wavetable == nullptr || !wavetable->loaded) {
+		if (wavetables[0] == nullptr || !wavetables[0]->loaded) {
 			lights[LOADED_LIGHT].setBrightness(0.f);
 		} else {
 			lights[LOADED_LIGHT].setBrightness(1.f);
@@ -78,7 +76,7 @@ struct Table : Module {
 		}
 
 		for (int c = 0; c < currentPolyphony; c++) {
-			if (wavetable == nullptr || wavetable->loading) {
+			if (wavetables[c] == nullptr || wavetables[c]->loading) {
 				outputs[OUTPUT].setVoltage(0.f, c);
 			} else {
 				// Set pitch
@@ -91,9 +89,9 @@ struct Table : Module {
 					pitch += inputs[FINE_INPUT].getPolyVoltage(c) / 5.f;
 				}
 				pitch = clamp(pitch, -3.5f, 3.5f);
-				oscillator[c].setPitch(pitch, args.sampleRate);
+				// wavetables[c]->setPitch(pitch, args.sampleRate);
 
-				// Set position (in terms of frame/cycle) in wavetable
+				// Set position in wavetable (which cycle to access)
 				float pos = params[POS_PARAM].getValue();
 				if (inputs[POS_INPUT].isConnected()) {
 					pos += inputs[POS_INPUT].getPolyVoltage(c) / 10.f;
@@ -101,10 +99,10 @@ struct Table : Module {
 				}
 
 				// Step forward in the table
-				oscillator[c].step();
+				wavetables[c]->updatePhase();
 
 				// Get sample
-				float out = oscillator[c].getSample(pos);
+				float out = wavetables[c]->getSample(pos, pitch, args.sampleRate) * 5.f;
 
 				// Send out
 				outputs[OUTPUT].setVoltage(out, c);
@@ -116,8 +114,8 @@ struct Table : Module {
 	json_t* dataToJson() override {
 		json_t* rootJ = json_object();
 
-		json_object_set_new(rootJ, "lastPath", json_string(wavetable->lastPath.c_str()));
-		json_object_set_new(rootJ, "lastFrameSize", json_integer(wavetable->frameSize));
+		json_object_set_new(rootJ, "lastPath", json_string(wavetables[0]->lastPath.c_str()));
+		json_object_set_new(rootJ, "lastFrameSize", json_integer(wavetables[0]->cycleLength));
 
 		return rootJ; 
 	}
@@ -137,12 +135,12 @@ struct Table : Module {
 
 struct LoadFileItem : MenuItem {
 	Table* module;
-	int frameSize;
+	int cycleLength;
 	void onAction(const event::Action& e) override {
-		if (module->wavetable != nullptr) {
+		if (module->wavetables[0] != nullptr) {
 			char* path = osdialog_file(OSDIALOG_OPEN, NULL, NULL, NULL);
 			if (path) {
-				module->loadWavetable(path, frameSize);
+				module->loadWavetable(path, cycleLength);
 				free(path);
 			}
 		}
@@ -155,12 +153,12 @@ struct LoadFileMenu : MenuItem {
 		Menu* menu = new Menu;
 		for (int i = 0; i < 4; i++) {
 			LoadFileItem* item = new LoadFileItem;
-			std::vector<int> frameSizes = module->wavetable->frameSizes;
+			std::vector<int> cycleLengths= Wavetable::cycleLengths;
 
-			item->text = string::f("%d samples/cycle", frameSizes[i]);
-			item->rightText = CHECKMARK(module->wavetable->frameSize == frameSizes[i]);
+			item->text = string::f("%d samples/cycle", cycleLengths[i]);
+			item->rightText = CHECKMARK(module->wavetables[0]->cycleLength == cycleLengths[i]);
 			item->module = module;
-			item->frameSize = frameSizes[i];
+			item->cycleLength = cycleLengths[i];
 			menu->addChild(item);
 		}
 
