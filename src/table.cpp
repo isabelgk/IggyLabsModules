@@ -55,9 +55,6 @@ struct Table : Module {
 
 	// Save CPU by processing certain parameters less frequently
 	void slowerProcess(const ProcessArgs& args) {
-		currentPolyphony = std::max(1, inputs[FREQ_INPUT].getChannels());
-		outputs[OUTPUT].setChannels(currentPolyphony);
-
 		// if (wavetables[0] == nullptr || !wavetables[0]->loaded) {
 		if (wavetable == nullptr || !wavetable->loaded) {
 			lights[LOADED_LIGHT].setBrightness(0.f);
@@ -72,6 +69,8 @@ struct Table : Module {
 			slowerProcess(args);
 		}
 
+		currentPolyphony = std::max(1, inputs[FREQ_INPUT].getChannels());
+		outputs[OUTPUT].setChannels(currentPolyphony);
 		for (int c = 0; c < currentPolyphony; c++) {
 			if (wavetable == nullptr || wavetable->loading) {
 				outputs[OUTPUT].setVoltage(0.f, c);
