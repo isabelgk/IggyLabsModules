@@ -69,7 +69,6 @@ namespace Wavetable {
                 }
                 drwav_free(sampleData);
 
-                // totalSampleCount /= channels;
                 int monoSampleCount = totalSampleCount / channels;
 
                 // It is possible that the buffer has fewer samples than the frame size
