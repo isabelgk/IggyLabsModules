@@ -115,14 +115,14 @@ struct Table : Module {
 		json_t* rootJ = json_object();
 
 		json_object_set_new(rootJ, "lastPath", json_string(wavetables[0]->lastPath.c_str()));
-		json_object_set_new(rootJ, "lastFrameSize", json_integer(wavetables[0]->cycleLength));
+		json_object_set_new(rootJ, "lastCycleLength", json_integer(wavetables[0]->cycleLength));
 
 		return rootJ; 
 	}
 
 	void dataFromJson(json_t* rootJ) override {
 		json_t* lastPathJ = json_object_get(rootJ, "lastPath");
-		json_t* lastFrameSizeJ = json_object_get(rootJ, "lastFrameSize");
+		json_t* lastFrameSizeJ = json_object_get(rootJ, "lastCycleLength");
 
 		if (lastPathJ && lastFrameSizeJ) {
 			std::string lastPath = json_string_value(lastPathJ);
@@ -138,11 +138,13 @@ struct LoadFileItem : MenuItem {
 	int cycleLength;
 	void onAction(const event::Action& e) override {
 		if (module->wavetables[0] != nullptr) {
-			char* path = osdialog_file(OSDIALOG_OPEN, NULL, NULL, NULL);
+			osdialog_filters* filters = osdialog_filters_parse(".wav files:wav");
+			char* path = osdialog_file(OSDIALOG_OPEN, NULL, NULL, filters);
 			if (path) {
 				module->loadWavetable(path, cycleLength);
 				free(path);
 			}
+			osdialog_filters_free(filters);
 		}
 	}
 };
