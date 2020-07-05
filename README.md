@@ -6,11 +6,7 @@
 
 ## Modules
 
-- **Table**: 2hp user wavetable oscillator
-
-## Wiki
-
-Available [here](https://github.com/IggyLabs/IggyLabsModules/wiki/Home/)
+- [Table](https://github.com/IggyLabs/IggyLabsModules/wiki/Oscillators#table): 2hp user wavetable oscillator
 
 
 ## Azure CI builds
