@@ -40,39 +40,25 @@ public:
         }
     }
 
-    // SetFrequency: Set normalized frequency, typically 0-0.5 (must be positive and less than 1!)
-    //
-    void SetFrequency(double inc) {
-        mPhaseInc = inc;
+    float GetOut(double phasor, double freq, double sampleRate) {
+        double freqNormal = freq / sampleRate;  // Phase increment
 
-        // update the current wave table selector
+        // Set frequency
         int curWaveTable = 0;
-        while ((mPhaseInc >= mWaveTables[curWaveTable].topFreq) && (curWaveTable < (mNumWaveTables - 1))) {
+        while ((freqNormal >= mWaveTables[curWaveTable].topFreq) && (curWaveTable < (mNumWaveTables - 1))) {
             ++curWaveTable;
         }
-        mCurWaveTable = curWaveTable;
-    }
 
+        waveTable *waveTable = &mWaveTables[curWaveTable];
 
-    // GetOutput: Returns the current oscillator output
-    //
-    float GetOutput(void) {
-        waveTable *waveTable = &mWaveTables[mCurWaveTable];
-
-        // linear interpolation
-        float temp = mPhasor * waveTable->waveTableLen;
+        // Linear interpolation
+        float temp = phasor * waveTable->waveTableLen;
         int intPart = temp;
         float fracPart = temp - intPart;
         float samp0 = waveTable->waveTable[intPart];
         float samp1 = waveTable->waveTable[intPart + 1];
+
         return samp0 + (samp1 - samp0) * fracPart;
-    }
-
-    float GetSample(double phasor, double freq, double sampleRate) {
-        SetFrequency(freq / sampleRate);
-        mPhasor = phasor;
-
-        return GetOutput();
     }
 
 
@@ -102,17 +88,13 @@ public:
     }
 
 protected:
-    double mPhasor = 0.0;       // phase accumulator
-    double mPhaseInc = 0.0;     // phase increment
-
-    // array of wavetables
-    int mCurWaveTable = 0;      // current table, based on current frequency
-    int mNumWaveTables = 0;     // number of wavetable slots in use
     struct waveTable {
         double topFreq;
         int waveTableLen;
         float *waveTable;
     };
+
+    int mNumWaveTables = 0;     // number of wavetable slots in use
     static constexpr int numWaveTableSlots = 40;    // simplify allocation with reasonable maximum
     waveTable mWaveTables[numWaveTableSlots];
 };

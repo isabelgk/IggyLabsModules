@@ -32,7 +32,7 @@ struct Table : Module {
 		NUM_LIGHTS
 	};
 
-	std::array<Wavetable::Wavetable*, 16> wavetables;  // Maximum 16 channels of polyphony
+	Wavetable::Wavetable* wavetable;
 	int currentPolyphony = 1;
 	int loopCounter = 0;
 
@@ -43,18 +43,14 @@ struct Table : Module {
 		configParam(Table::FREQ_PARAM, -3.0f, 3.0f, 0.0f, "Coarse");
 		configParam(Table::FINE_PARAM, -0.5f, 0.5f, 0.0f, "Fine");
 
-		for (int i = 0; i < 16; i++) {
-			wavetables[i] = new Wavetable::Wavetable();
-		}
+		wavetable = new Wavetable::Wavetable();
 	}
 
 
 
 	void loadWavetable(std::string path, int cycleLength) {
-		for (int i = 0; i < 16; i++) {
-			wavetables[i] = new Wavetable::Wavetable();
-			wavetables[i]->loadWavetable(path, cycleLength);
-		}
+		wavetable = new Wavetable::Wavetable();
+		wavetable->loadWavetable(path, cycleLength);
 	}
 
 	// Save CPU by processing certain parameters less frequently
@@ -62,7 +58,8 @@ struct Table : Module {
 		currentPolyphony = std::max(1, inputs[FREQ_INPUT].getChannels());
 		outputs[OUTPUT].setChannels(currentPolyphony);
 
-		if (wavetables[0] == nullptr || !wavetables[0]->loaded) {
+		// if (wavetables[0] == nullptr || !wavetables[0]->loaded) {
+		if (wavetable == nullptr || !wavetable->loaded) {
 			lights[LOADED_LIGHT].setBrightness(0.f);
 		} else {
 			lights[LOADED_LIGHT].setBrightness(1.f);
@@ -76,7 +73,7 @@ struct Table : Module {
 		}
 
 		for (int c = 0; c < currentPolyphony; c++) {
-			if (wavetables[c] == nullptr || wavetables[c]->loading) {
+			if (wavetable == nullptr || wavetable->loading) {
 				outputs[OUTPUT].setVoltage(0.f, c);
 			} else {
 				// Set pitch
@@ -98,13 +95,10 @@ struct Table : Module {
 					pos = clamp(pos, 0.f, 1.f);
 				}
 
-				// Step forward in the table
-				wavetables[c]->updatePhase();
+				// This does everything to update the phase, frequency, etc. before
+				// returning the sample * 5 (to be in the 5V output range)
+				float out = wavetable->process(c, pos, pitch, args.sampleRate) * 5.f;
 
-				// Get sample
-				float out = wavetables[c]->getSample(pos, pitch, args.sampleRate) * 5.f;
-
-				// Send out
 				outputs[OUTPUT].setVoltage(out, c);
 			}
 		}
@@ -114,8 +108,8 @@ struct Table : Module {
 	json_t* dataToJson() override {
 		json_t* rootJ = json_object();
 
-		json_object_set_new(rootJ, "lastPath", json_string(wavetables[0]->lastPath.c_str()));
-		json_object_set_new(rootJ, "lastFrameSize", json_integer(wavetables[0]->cycleLength));
+		json_object_set_new(rootJ, "lastPath", json_string(wavetable->lastPath.c_str()));
+		json_object_set_new(rootJ, "lastFrameSize", json_integer(wavetable->cycleLength));
 
 		return rootJ; 
 	}
@@ -137,7 +131,7 @@ struct LoadFileItem : MenuItem {
 	Table* module;
 	int cycleLength;
 	void onAction(const event::Action& e) override {
-		if (module->wavetables[0] != nullptr) {
+		if (module->wavetable != nullptr) {
 			char* path = osdialog_file(OSDIALOG_OPEN, NULL, NULL, NULL);
 			if (path) {
 				module->loadWavetable(path, cycleLength);
@@ -156,7 +150,7 @@ struct LoadFileMenu : MenuItem {
 			std::vector<int> cycleLengths= Wavetable::cycleLengths;
 
 			item->text = string::f("%d samples/cycle", cycleLengths[i]);
-			item->rightText = CHECKMARK(module->wavetables[0]->cycleLength == cycleLengths[i]);
+			item->rightText = CHECKMARK(module->wavetable->cycleLength == cycleLengths[i]);
 			item->module = module;
 			item->cycleLength = cycleLengths[i];
 			menu->addChild(item);

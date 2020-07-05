@@ -24,8 +24,8 @@ namespace Wavetable {
         bool loading = false;
         bool loaded = false;
 
-        double mPhasor = 0.f;     // phase accumulator
-        double mPhaseInc = 0.f;   // phase incremenet
+        std::array<double, 16> phasors;    // phase accumulator
+        std::array<double, 16> phaseIncs;  // phase increment, aka normalized frequency
 
         // To create multiple positions for a 2D wavetable voice, 
         // make a single WaveTableOsc for each possible cycle.
@@ -39,6 +39,9 @@ namespace Wavetable {
             numCycles = 1;
             loading = false;
             loaded = false;
+
+            phasors.fill(0.f);
+            phaseIncs.fill(0.f);
         }
 
         void loadWavetable(std::string path, int cl) {
@@ -69,7 +72,6 @@ namespace Wavetable {
                 }
                 drwav_free(sampleData);
 
-                // totalSampleCount /= channels;
                 int monoSampleCount = totalSampleCount / channels;
 
                 // It is possible that the buffer has fewer samples than the frame size
@@ -95,29 +97,28 @@ namespace Wavetable {
             loaded = true;
         }
 
-        void updatePhase() {
-            mPhasor += mPhaseInc;
 
-            if (mPhasor >= 1.0) {
-                mPhasor -= 1.0;
+        float process(int channel, float cycleIndex, double pitch, double sampleRate) {
+            // Update phasor
+            phasors[channel] += phaseIncs[channel];
+            if (phasors[channel] >= 1.0) {
+                phasors[channel] = phasors[channel] - 1.0;
             }
-        }
 
-        float getSample(float cycleIndex, double pitch, double sampleRate) {
-            double freq = dsp::FREQ_C4 * powf(2.0f, pitch);
-            mPhaseInc = freq / sampleRate;
+            // Set pitch
+            double freq = dsp::FREQ_C4 * powf(2.f, pitch);
+            phaseIncs[channel] = freq / sampleRate;
 
             float tablePos = cycleIndex * (numCycles - 1);  // [0..tableSize]
             int tablePosBottom = floor(tablePos);
             int tablePosTop = ceil(tablePos);
             float tablePosFrac = tablePos - (float) tablePosBottom;  // [0..1]
 
-            float above = wavetableOscillators[tablePosTop]->GetSample(mPhasor, freq, sampleRate);
-            float below = wavetableOscillators[tablePosBottom]->GetSample(mPhasor, freq, sampleRate);
+            float above = wavetableOscillators[tablePosTop]->GetOut(phasors[channel], freq, sampleRate);
+            float below = wavetableOscillators[tablePosBottom]->GetOut(phasors[channel], freq, sampleRate);
 
             // Linear interpolation
             return below + tablePosFrac * (above - below);
-
         }
     };
     
