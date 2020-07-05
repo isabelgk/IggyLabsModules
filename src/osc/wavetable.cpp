@@ -5,7 +5,6 @@
 #include "../../lib/dr_wav.h"
 #include "osc/earlevel/WaveUtils.cpp"
 
-
 #define BASE_FREQUENCY 20    // Starting frequency of the first table, 20Hz
 #define MAX_CYCLE_COUNT 256
 #define MAX_CYCLE_LENGTH 2048
@@ -107,10 +106,6 @@ namespace Wavetable {
         float getSample(float cycleIndex, double pitch, double sampleRate) {
             double freq = dsp::FREQ_C4 * powf(2.0f, pitch);
             mPhaseInc = freq / sampleRate;
-
-            // if (numCycles == 1) {
-            //     return wavetableOscillators[0]->GetSample(mPhasor, freq, sampleRate);
-            // }
 
             float tablePos = cycleIndex * (numCycles - 1);  // [0..tableSize]
             int tablePosBottom = floor(tablePos);
