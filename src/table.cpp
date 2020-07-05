@@ -131,7 +131,7 @@ struct LoadFileItem : MenuItem {
 	int cycleLength;
 	void onAction(const event::Action& e) override {
 
-		if (module->wavetables[0] != nullptr) {
+		if (module->wavetable != nullptr) {
 			osdialog_filters* filters = osdialog_filters_parse(".wav files:wav");
 			char* path = osdialog_file(OSDIALOG_OPEN, NULL, NULL, filters);
 			if (path) {
