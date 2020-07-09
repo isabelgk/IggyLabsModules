@@ -3,11 +3,11 @@
 #include <array>
 #include <string>
 #include <vector>
-#include "plugin.hpp"
+#include "../plugin.hpp"
 #include "osdialog.h"
 
-#include "widgets.hpp"
-#include "osc/wavetable.cpp"
+#include "../widgets.hpp"
+#include "../osc/wavetable.cpp"
 
 
 struct Table : Module {
