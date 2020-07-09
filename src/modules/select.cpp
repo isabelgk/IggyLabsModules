@@ -20,30 +20,41 @@ struct Select : Module {
 		NUM_LIGHTS
 	};
 
+	int loopCounter = 0;
+	int maxPolyphony = 1;
+
 	Select() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(SELECT_PARAM, 0.f, 15.f, 0.f, "Selected");
 	}
 
-	void process(const ProcessArgs& args) override {
-		int selection = int(params[SELECT_PARAM].getValue());
-
+	void slowerProcess(const ProcessArgs& args, int sel) {
 		// Set lights
 		for (int i = 0; i < 16; i++) {
-			if (i == selection) {
-				lights[selection].setBrightness(1.f);
+			if (i == sel) {
+				lights[i].setBrightness(1.f);
 			} else {
 				lights[i].setBrightness(0.f);
 			}
 		}
+	}
 
-		int channelsIn = inputs[INPUTS + selection].isConnected() ? inputs[INPUTS + selection].getChannels() : 1;
+	void process(const ProcessArgs& args) override {
+		int selection = int(params[SELECT_PARAM].getValue());
 
-		for (int c = 0; c < channelsIn; c++) {
+		// Update lights and check polyphony less frequently
+		if (loopCounter-- == 0) {
+			loopCounter = 16;
+			slowerProcess(args, selection);
+		}
+
+		maxPolyphony = inputs[INPUTS + selection].isConnected() ? inputs[INPUTS + selection].getChannels() : 1;
+
+		for (int c = 0; c < maxPolyphony; c++) {
 			outputs[THRU_OUTPUT].setVoltage(inputs[INPUTS + selection].getVoltage(c), c);
 		}
 
-		outputs[THRU_OUTPUT].setChannels(channelsIn);
+		outputs[THRU_OUTPUT].setChannels(maxPolyphony);
 	}
 };
 
