@@ -22,6 +22,14 @@
         "polyphonic"
       ],
       "manualUrl": "https://github.com/IggyLabs/IggyLabsModules/wiki/Oscillators#table"
+    },
+    {
+      "slug": "select",
+      "name": "select",
+      "description": "Utility to route one of 16 inputs to an output",
+      "tags": [
+        "utility"
+      ]
     }
   ]
 }

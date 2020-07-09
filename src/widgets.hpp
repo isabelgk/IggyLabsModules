@@ -20,6 +20,7 @@ struct IlKnobS : RoundKnob {
 
 struct IlKnobM : RoundKnob {
     IlKnobM() {
+        snap = true;
         setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/knob_m.svg")));
     }
 };
