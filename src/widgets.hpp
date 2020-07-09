@@ -1,3 +1,6 @@
+#ifndef IGGYLABS_WIDGETS_HPP
+#define IGGYLABS_WIDGETS_HPP
+
 // Knobs
 
 struct IlKnobXXS : RoundKnob {
@@ -45,3 +48,5 @@ struct IlPort : SvgPort {
         setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/port.svg")));
     }
 };
+
+#endif

@@ -26,6 +26,24 @@ struct Select : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
+		int selection = int(params[SELECT_PARAM].getValue());
+
+		// Set lights
+		for (int i = 0; i < 16; i++) {
+			if (i == selection) {
+				lights[selection].setBrightness(1.f);
+			} else {
+				lights[i].setBrightness(0.f);
+			}
+		}
+
+		int channelsIn = inputs[INPUTS + selection].isConnected() ? inputs[INPUTS + selection].getChannels() : 1;
+
+		for (int c = 0; c < channelsIn; c++) {
+			outputs[THRU_OUTPUT].setVoltage(inputs[INPUTS + selection].getVoltage(c), c);
+		}
+
+		outputs[THRU_OUTPUT].setChannels(channelsIn);
 	}
 };
 
