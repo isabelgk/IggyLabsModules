@@ -108,20 +108,20 @@ struct Table : Module {
 		json_t* rootJ = json_object();
 
 		json_object_set_new(rootJ, "lastPath", json_string(wavetable->lastPath.c_str()));
-		json_object_set_new(rootJ, "lastFrameSize", json_integer(wavetable->cycleLength));
+		json_object_set_new(rootJ, "lastCycleLength", json_integer(wavetable->cycleLength));
 
 		return rootJ; 
 	}
 
 	void dataFromJson(json_t* rootJ) override {
 		json_t* lastPathJ = json_object_get(rootJ, "lastPath");
-		json_t* lastFrameSizeJ = json_object_get(rootJ, "lastCycleLength");
+		json_t* lastCycleLengthJ = json_object_get(rootJ, "lastCycleLength");
 
-		if (lastPathJ && lastFrameSizeJ) {
+		if (lastPathJ && lastCycleLengthJ) {
 			std::string lastPath = json_string_value(lastPathJ);
-			int lastFrameSize = json_integer_value(lastFrameSizeJ);
+			int lastCycleLength = json_integer_value(lastCycleLengthJ);
 
-			loadWavetable(lastPath, lastFrameSize);
+			loadWavetable(lastPath, lastCycleLength);
 		}
 	}
 };
