@@ -1,5 +1,5 @@
 // Plugins for VCV Rack by iggy.labs
-
+#include <math.h>
 #include <vector>
 #define DR_WAV_IMPLEMENTATION
 #include "../../lib/dr_wav.h"
@@ -79,19 +79,46 @@ namespace Wavetable {
                     cycleLength = monoSampleCount;
                     numCycles = 1;
                 } else {
-                    numCycles = totalSampleCount / cycleLength;
+                    numCycles = monoSampleCount / cycleLength;
                 }
 
                 // Cut off the wavetable if we populate more than the number of allowed cycles
                 if (numCycles > MAX_CYCLE_COUNT) {
                     numCycles = MAX_CYCLE_COUNT;
                 }
+                
+                
+                // Keep count of how many real cycles there are. Sometimes a sample is just 
+                // all zeros, and the wavetable oscillator can't handle that.
+                int nonZeroCycles = 0;
 
                 // BUILD EACH CYCLE'S WAVETABLE NOW
                 wavetableOscillators.clear();
                 for (int i = 0; i < numCycles; i++) {
-                    wavetableOscillators.push_back(waveOsc(cycleBuffers[i].data(), (int) cycleBuffers[i].size()));
+
+                    // We have to check every cycle snippet of the larger sample to make
+                    // sure it isn't flat. Also, since the cycle lengths can be different,
+                    // don't accidentally pad with all zeros. I'm still figuring out C++
+                    // so there is almost certainly a more idiomatic way to do this
+                    // array allocation.
+                    std::vector<double> temp;
+                    double sum = 0.f;
+                    for (int j = 0; j < cycleLength; j++) {
+                        temp.push_back(cycleBuffers[i][j]);
+                        sum += fabs(cycleBuffers[i][j]);
+                    }
+
+                    // For floating point arithmetic, just say that a cycle isn't zero
+                    // if it's above a small threshold
+                    if (sum > 0.1f) {
+                        nonZeroCycles += 1;
+                        wavetableOscillators.push_back(waveOsc(temp.data(), (int) temp.size()));
+                    }
+
+                    // Make sure we don't just build up the temp vector every iteration...
+                    temp.clear();
                 }
+                numCycles = nonZeroCycles;
             }
             loading = false;
             loaded = true;
