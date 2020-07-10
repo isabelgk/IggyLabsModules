@@ -10,3 +10,6 @@
 ## Modules
 
 See the [wiki](https://github.com/IggyLabs/IggyLabsModules/wiki/Manual)
+
+## Support my work
+[Buy me a coffee](buymeacoff.ee/iggylabs)
