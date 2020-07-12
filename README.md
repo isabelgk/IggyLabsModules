@@ -5,11 +5,15 @@
 
 ## Azure CI builds
 
-[Available on the release page](https://github.com/IggyLabs/IggyLabsModules/releases/tag/AzureCI)
+Bleeding edge builds are [available on the release page](https://github.com/IggyLabs/IggyLabsModules/releases/tag/AzureCI)
+
+Old versions are also tagged and available on the release page.
 
 ## Modules
 
-See the [wiki](https://github.com/IggyLabs/IggyLabsModules/wiki/Manual)
+See the [wiki](https://github.com/IggyLabs/IggyLabsModules/wiki/Manual) for more information.
 
-## Support my work
+Subscribe to the collection in the [VCV Library](https://library.vcvrack.com/?brand=iggy.labs).
+
+## Want to support my work?
 [Buy me a coffee](https://www.buymeacoffee.com/iggylabs)
