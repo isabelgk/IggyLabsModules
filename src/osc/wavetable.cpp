@@ -96,39 +96,21 @@ namespace Wavetable {
                 }
                 drwav_free(sampleData);
                 
-                // Keep count of how many real cycles there are. Sometimes a sample is just 
-                // all zeros, and the wavetable oscillator can't handle that.
-                int nonZeroCycles = 0;
-
                 // BUILD EACH CYCLE'S WAVETABLE NOW
                 wavetableOscillators.clear();
                 for (int i = 0; i < this->numCycles; i++) {
 
-                    // We have to check every cycle snippet of the larger sample to make
-                    // sure it isn't flat. Also, since the cycle lengths can be different,
-                    // don't accidentally pad with all zeros. I'm still figuring out C++
-                    // so there is almost certainly a more idiomatic way to do wavetable
-                    // array allocation.
+                    // Because of how we allocated the cycle buffers, we have to slice
+                    // only the part that is in the cycle, not the MAX_CYCLE_LENGTH
+                    // to avoid padding with zeros
                     std::vector<double> temp;
-                    double sum = 0.f;
                     for (int j = 0; j < this->cycleLength; j++) {
                         temp.push_back(cycleBuffers[i][j]);
-                        sum += fabs(cycleBuffers[i][j]);
                     }
 
-                    // For floating point arithmetic, just say that a cycle isn't zero
-                    // if it's above a small threshold
-                    if (sum > 0.1f) {
-                        nonZeroCycles += 1;
-                        wavetableOscillators.push_back(waveOsc(temp.data(), (int) temp.size()));
-                    }
-
-                    // Make sure we don't just build up the temp vector every iteration...
+                    wavetableOscillators.push_back(waveOsc(temp.data(), (int) temp.size()));
                     temp.clear();
                 }
-
-                // Now we _really_ know the number of cycles, so update accordingly
-                this->numCycles = nonZeroCycles;
             }
             loading = false;
             loaded = true;

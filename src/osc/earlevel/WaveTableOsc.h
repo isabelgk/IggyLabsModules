@@ -52,6 +52,10 @@ public:
         waveTable *waveTable = &mWaveTables[curWaveTable];
 
         // Linear interpolation
+        if (waveTable->waveTableLen == 0) {
+            return 0.f;
+        }
+
         float temp = phasor * waveTable->waveTableLen;
         int intPart = temp;
         float fracPart = temp - intPart;
