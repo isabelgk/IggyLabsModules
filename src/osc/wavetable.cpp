@@ -48,7 +48,7 @@ namespace Wavetable {
             // Only update `frameSize` if valid
             for (int i = 0; i < (int) cycleLengths.size(); i++) {
                 if (cl == cycleLengths[i]) {
-                    cycleLength = cl;
+                    this->cycleLength = cl;
                 }
             }
 
@@ -60,33 +60,41 @@ namespace Wavetable {
             loading = true;
 
             float* sampleData;
-            // TODO - check on the file type
             sampleData = drwav_open_and_read_file_f32(path.c_str(), &channels, &sampleRate, &totalSampleCount);
 
             if (sampleData != NULL) {
                 lastPath = path.c_str();
                 cycleBuffers = std::array<std::array<double, MAX_CYCLE_LENGTH>, MAX_CYCLE_COUNT>();
 
-                for (unsigned int i = 0; i < totalSampleCount; i = i + channels) {
-                    cycleBuffers[i / cycleLength][i % cycleLength] = sampleData[i];
-                }
-                drwav_free(sampleData);
-
                 int monoSampleCount = totalSampleCount / channels;
 
-                // It is possible that the buffer has fewer samples than the frame size
-                if (monoSampleCount < cycleLength) {
-                    cycleLength = monoSampleCount;
-                    numCycles = 1;
-                } else {
-                    numCycles = monoSampleCount / cycleLength;
+                // Scenarios:
+                // 1. We have too many samples to fit in (samples/cycle) * (number of cycles)
+                // 2. We do not have enough samples to fit in a single cycle
+
+                // Scenario 1: Adjust the number of samples if too high
+                if (monoSampleCount > MAX_CYCLE_COUNT * this->cycleLength) {
+                    monoSampleCount = MAX_CYCLE_COUNT * this->cycleLength;
                 }
 
-                // Cut off the wavetable if we populate more than the number of allowed cycles
-                if (numCycles > MAX_CYCLE_COUNT) {
-                    numCycles = MAX_CYCLE_COUNT;
+                // Scenario 2: Shrink cycle length if needed
+                if (monoSampleCount < this->cycleLength) {
+                    this->cycleLength = monoSampleCount;
+                    this->numCycles = 1;
+                } else {
+                    this->numCycles = monoSampleCount / this->cycleLength;
+                }
+
+                // Scenario 1: Adjust the number of cycles if calculated is too high
+                if (this->numCycles > MAX_CYCLE_COUNT) {
+                    this->numCycles = MAX_CYCLE_COUNT;
                 }
                 
+                // Now we can fill the buffers with the sample data
+                for (int i = 0; i < monoSampleCount; i++) {
+                    cycleBuffers[i / this->cycleLength][i % this->cycleLength] = sampleData[i];
+                }
+                drwav_free(sampleData);
                 
                 // Keep count of how many real cycles there are. Sometimes a sample is just 
                 // all zeros, and the wavetable oscillator can't handle that.
@@ -94,16 +102,16 @@ namespace Wavetable {
 
                 // BUILD EACH CYCLE'S WAVETABLE NOW
                 wavetableOscillators.clear();
-                for (int i = 0; i < numCycles; i++) {
+                for (int i = 0; i < this->numCycles; i++) {
 
                     // We have to check every cycle snippet of the larger sample to make
                     // sure it isn't flat. Also, since the cycle lengths can be different,
                     // don't accidentally pad with all zeros. I'm still figuring out C++
-                    // so there is almost certainly a more idiomatic way to do this
+                    // so there is almost certainly a more idiomatic way to do wavetable
                     // array allocation.
                     std::vector<double> temp;
                     double sum = 0.f;
-                    for (int j = 0; j < cycleLength; j++) {
+                    for (int j = 0; j < this->cycleLength; j++) {
                         temp.push_back(cycleBuffers[i][j]);
                         sum += fabs(cycleBuffers[i][j]);
                     }
@@ -118,7 +126,9 @@ namespace Wavetable {
                     // Make sure we don't just build up the temp vector every iteration...
                     temp.clear();
                 }
-                numCycles = nonZeroCycles;
+
+                // Now we _really_ know the number of cycles, so update accordingly
+                this->numCycles = nonZeroCycles;
             }
             loading = false;
             loaded = true;
@@ -136,7 +146,7 @@ namespace Wavetable {
             double freq = dsp::FREQ_C4 * powf(2.f, pitch);
             phaseIncs[channel] = freq / sampleRate;
 
-            float tablePos = cycleIndex * (numCycles - 1);  // [0..tableSize]
+            float tablePos = cycleIndex * (this->numCycles - 1);  // [0..tableSize]
             int tablePosBottom = floor(tablePos);
             int tablePosTop = ceil(tablePos);
             float tablePosFrac = tablePos - (float) tablePosBottom;  // [0..1]
