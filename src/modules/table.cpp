@@ -55,7 +55,6 @@ struct Table : Module {
 
 	// Save CPU by processing certain parameters less frequently
 	void slowerProcess(const ProcessArgs& args) {
-		// if (wavetables[0] == nullptr || !wavetables[0]->loaded) {
 		if (wavetable == nullptr || !wavetable->loaded) {
 			lights[LOADED_LIGHT].setBrightness(0.f);
 		} else {
@@ -85,7 +84,6 @@ struct Table : Module {
 					pitch += inputs[FINE_INPUT].getPolyVoltage(c) / 5.f;
 				}
 				pitch = clamp(pitch, -3.5f, 3.5f);
-				// wavetables[c]->setPitch(pitch, args.sampleRate);
 
 				// Set position in wavetable (which cycle to access)
 				float pos = params[POS_PARAM].getValue();
