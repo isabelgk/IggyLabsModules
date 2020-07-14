@@ -15,6 +15,14 @@ namespace Wavetable {
     static std::vector<int> cycleLengths { 256, 512, 1024, 2048 };
 
     struct Wavetable {
+
+        enum Presets {
+            BASIC_SHAPES,
+            E_PIANO,
+            HARMONICS,
+            NUM_PRESETS
+        };
+
         std::string lastPath;
         std::array<std::array<double, MAX_CYCLE_LENGTH>, MAX_CYCLE_COUNT> cycleBuffers;
 
@@ -115,7 +123,6 @@ namespace Wavetable {
             loading = false;
             loaded = true;
         }
-
 
         float process(int channel, float cycleIndex, double pitch, double sampleRate) {
             // Update phasor

@@ -161,6 +161,40 @@ struct LoadFileMenu : MenuItem {
 };
 
 
+struct PresetWavetable : MenuItem {
+	Table* module;
+	std::string path;
+	int cycleLength;
+
+	void onAction(const event::Action& e) override {
+		if (module->wavetable != nullptr) {
+			std::string test = asset::plugin(pluginInstance, path);
+			module->loadWavetable(asset::plugin(pluginInstance, path), cycleLength);
+		}
+	}
+};
+
+struct PresetWavetableMenu : MenuItem {
+	Table* module;
+	Menu* createChildMenu() override {
+		// Four preset wavetables available
+		std::string filenames[4] = { "res/audio/Harmonic.wav", "res/audio/Chebyshev.wav", "res/audio/Formant.wav", "res/audio/SpectralNoise.wav" };
+		std::string displayNames[4] = { "Harmonic", "Chebyshev", "Formant", "Spectral Noise" };
+
+		Menu* menu = new Menu;
+		for ( int i = 0; i < 4; i++) {
+			PresetWavetable* preset = new PresetWavetable;
+			preset->module = module;
+			preset->path = filenames[i];
+			preset->text = displayNames[i];
+			preset->cycleLength = 2048;  // All presets are the same length for now
+			menu->addChild(preset);
+		}
+
+		return menu;
+	}
+};
+
 struct TableWidget : ModuleWidget {
 	TableWidget(Table* module) {
 		setModule(module);
@@ -195,6 +229,11 @@ struct TableWidget : ModuleWidget {
 		loadFileMenu->text = "Load wavetable";
 		loadFileMenu->module = module;
 		menu->addChild(loadFileMenu);
+
+		PresetWavetableMenu* presetMenu = new PresetWavetableMenu;
+		presetMenu->text = "Preset wavetables";
+		presetMenu->module = module;
+		menu->addChild(presetMenu);
 	}
 };
 
