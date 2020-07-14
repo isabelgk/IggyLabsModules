@@ -1,0 +1,18 @@
+v1.0.2
+===
+Added features:
+- table now includes four presets (#4)
+
+Bug fixes:
+- Fixed samples with no harmonics (flat or empty samples) causing crashes (#24)
+- Fixed crash on loading wavetables that are too long (#21)
+
+
+v1.0.1
+===
+Added features:
+- select module added
+
+Bug fixes:
+- Fixed recalling wavetables on patch load (#13)
+- Fixed zero-padding issue for wavetables imported using any option smaller than 2048 samples/cycle (#14)
