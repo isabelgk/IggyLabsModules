@@ -35,6 +35,7 @@ struct Table : Module {
 	Wavetable::Wavetable* wavetable;
 	int currentPolyphony = 1;
 	int loopCounter = 0;
+	std::string currentTableName = "Single Saw";  // Name the default oscillator
 
 	Table() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -46,11 +47,10 @@ struct Table : Module {
 		wavetable = new Wavetable::Wavetable();
 	}
 
-
-
 	void loadWavetable(std::string path, int cycleLength) {
 		wavetable = new Wavetable::Wavetable();
 		wavetable->loadWavetable(path, cycleLength);
+		this->currentTableName = string::filenameBase(string::filename(path));
 	}
 
 	// Save CPU by processing certain parameters less frequently
@@ -178,7 +178,7 @@ struct PresetWavetableMenu : MenuItem {
 	Table* module;
 	Menu* createChildMenu() override {
 		// Four preset wavetables available
-		std::string filenames[4] = { "res/audio/Harmonic.wav", "res/audio/Chebyshev.wav", "res/audio/Formant.wav", "res/audio/SpectralNoise.wav" };
+		std::string filenames[4] = { "res/audio/Harmonic.wav", "res/audio/Chebyshev.wav", "res/audio/Formant.wav", "res/audio/Spectral Noise.wav" };
 		std::string displayNames[4] = { "Harmonic", "Chebyshev", "Formant", "Spectral Noise" };
 
 		Menu* menu = new Menu;
@@ -224,7 +224,15 @@ struct TableWidget : ModuleWidget {
 	void appendContextMenu(Menu* menu) override {
 		Table* module = dynamic_cast<Table*>(this->module);
 
-		menu->addChild(new MenuEntry);
+		menu->addChild(new MenuSeparator());
+		MenuItem* currentFileLoaded = new MenuItem;
+		currentFileLoaded->disabled = true;
+		currentFileLoaded->text = "Current table";
+		currentFileLoaded->rightText = module->currentTableName;
+		menu->addChild(currentFileLoaded);
+
+		menu->addChild(new MenuSeparator());
+
 		LoadFileMenu* loadFileMenu = new LoadFileMenu;
 		loadFileMenu->text = "Load wavetable";
 		loadFileMenu->module = module;

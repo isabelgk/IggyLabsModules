@@ -2,6 +2,7 @@ v1.0.2
 ===
 Added features:
 - table now includes four presets (#4)
+- table now shows the currently loaded wavetable (#19)
 
 Bug fixes:
 - Fixed samples with no harmonics (flat or empty samples) causing crashes (#24)
