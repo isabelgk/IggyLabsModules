@@ -30,6 +30,12 @@
       "tags": [
         "utility"
       ]
+    },
+    {
+      "slug": "more-ideas",
+      "name": "more-ideas",
+      "description": "Elementary cellular automata sequencer (modeled after less concepts for norns)",
+      "tags": []
     }
   ]
 }

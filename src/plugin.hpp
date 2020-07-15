@@ -10,5 +10,6 @@ extern Plugin* pluginInstance;
 
 
 // Declare each Model, defined in each module source file
+extern Model* modelMore_ideas;
 extern Model* modelTable;
 extern Model* modelSelect;

@@ -1,5 +1,5 @@
 #include "../plugin.hpp"
-#include "../widgets.hpp"
+#include "widgets.hpp"
 
 
 struct Select : Module {

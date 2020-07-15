@@ -2,8 +2,8 @@
 #include <math.h>
 #include <vector>
 #define DR_WAV_IMPLEMENTATION
-#include "../../lib/dr_wav.h"
-#include "osc/earlevel/WaveUtils.cpp"
+#include "../../../lib/dr_wav.h"
+#include "../../dsp/osc/earlevel/WaveUtils.cpp"
 
 #define BASE_FREQUENCY 20    // Starting frequency of the first table, 20Hz
 #define MAX_CYCLE_COUNT 256

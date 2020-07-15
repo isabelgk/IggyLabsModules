@@ -6,8 +6,8 @@
 #include "../plugin.hpp"
 #include "osdialog.h"
 
-#include "../widgets.hpp"
-#include "../osc/wavetable.cpp"
+#include "widgets.hpp"
+#include "../dsp/osc/wavetable.cpp"
 
 
 struct Table : Module {
