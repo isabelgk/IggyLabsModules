@@ -1,5 +1,4 @@
 #include "../plugin.hpp"
-#include "widgets.hpp"
 
 #include "../dsp/pitch.hpp"
 #include "../dsp/trigger.hpp"
@@ -41,12 +40,18 @@ struct More_ideas : Module {
 
 	Trigger clockTrigger;
 	MoreIdeas::Model *stateModel = new MoreIdeas::Model();
+
+	int gridWidth = 64;
+	MoreIdeas::CA* ca = nullptr;
 	bool caDirty = true;
+	
+	bool scaleTextDirty = true;
+
 
 	More_ideas() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(RULE_PARAM, 0.f, 255.f, 0.f, "Rule");
-		configParam(SEED_PARAM, 0.f, 255.f, 0.f, "Seed");
+		configParam(RULE_PARAM, 0.f, 255.f, 90.f, "Rule");
+		configParam(SEED_PARAM, 0.f, 255.f, 30.f, "Seed");
 		configParam(LOW_PARAM, 0.f, 28.f, 0.f, "Low");
 		configParam(HIGH_PARAM, 0.f, 28.f, 14.f, "High");
 		configParam(SCALE_PARAM, 0.f, 16.f, 0.f, "Scale");
@@ -100,6 +105,8 @@ struct More_ideas : Module {
 		// Only update if it changes
 		if (floor(rule) != this->stateModel->rule->integer) {
 			stateModel->setRule(floor(rule));
+			this->caDirty = true;
+			this->ca = new MoreIdeas::CA(floor(rule), this->stateModel->seed->integer, this->gridWidth);
 		}
 
 		// SEED
@@ -110,6 +117,8 @@ struct More_ideas : Module {
 		seed = clamp(seed, 0.f, 255.f);
 		if (floor(seed) != this->stateModel->seed->integer) {
 			stateModel->setSeed(floor(seed));
+			this->caDirty = true;
+			this->ca = new MoreIdeas::CA(floor(rule), this->stateModel->seed->integer, this->gridWidth);
 		}
 
 		// LOW
@@ -137,6 +146,9 @@ struct More_ideas : Module {
 			scale += iggylabs::util::rescale(inputscale, -10.f, 10.f, 0.f, 16.f);
 		}
 		scale = clamp(scale, 0.f, 16.f);
+		if (stateModel->scaleIndex != floor(scale)) {
+			this->scaleTextDirty = true;
+		}
 		stateModel->scaleIndex = floor(scale);
 
 		// SELECT
@@ -150,6 +162,7 @@ struct More_ideas : Module {
 	}
 };
 
+
 struct CaFramebufferWidget : FramebufferWidget {
 	More_ideas* module;
 	CaFramebufferWidget(More_ideas* module) {
@@ -160,6 +173,7 @@ struct CaFramebufferWidget : FramebufferWidget {
 		if (module) {
 			if (module->caDirty) {
 				FramebufferWidget::dirty = true;
+
 				module->caDirty = false;
 			}
 			FramebufferWidget::step();
@@ -169,22 +183,82 @@ struct CaFramebufferWidget : FramebufferWidget {
 
 struct CaDrawWidget : OpaqueWidget {
 	More_ideas* module;
-	int gridWidth = 128;
 
 	CaDrawWidget(More_ideas* module) {
 		this->module = module;
 	}
 
 	void draw(const DrawArgs& args) override {
+		if (!module || module->ca == nullptr) return;
+
+		float sizeX = box.size.x / float(module->gridWidth);
+		float sizeY = box.size.y / float(module->gridWidth);
+
+		for (int i = 0; i < module->gridWidth; i++) {
+			for (int j = 0; j < module->gridWidth; j++) {
+				if (module->ca->cells[j][i]) {
+					nvgBeginPath(args.vg);
+					nvgRect(args.vg, i * sizeX, j * sizeY, sizeX, sizeY);
+					nvgFillColor(args.vg, nvgRGB(224, 247, 250));
+					nvgFill(args.vg);
+				}
+			}
+		}
+	}
+};
+
+struct TextFramebufferWidget : FramebufferWidget {
+	More_ideas* module;
+	TextFramebufferWidget(More_ideas* module) {
+		this->module = module;
+	}
+
+	void step() override {
+		if (module) {
+			if (module->scaleTextDirty) {
+				FramebufferWidget::dirty = true;
+
+				module->scaleTextDirty = false;
+			}
+			FramebufferWidget::step();
+		}
+	}
+};
+
+struct TextDrawWidget : OpaqueWidget {
+	More_ideas* module;
+	std::string text = "";
+	std::shared_ptr<Font> font;
+
+	TextDrawWidget(More_ideas* module) {
+		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/font/Londrina_Solid/LondrinaSolid-Regular.ttf"));
+		this->module = module;
+	}
+
+	void draw(const DrawArgs& args) override {
 		if (!module) return;
+		nvgFontSize(args.vg, 9);
+		nvgFontFaceId(args.vg, font->handle);
+		nvgFillColor(args.vg, nvgRGB(0, 131, 143));
+		text = module->stateModel->scaleNames[module->stateModel->scaleIndex];
 
-		float sizeX = box.size.x / float(gridWidth);
-		float sizeY = box.size.y / float(gridWidth);
+		nvgTextAlign(args.vg, NVG_ALIGN_LEFT);
+		nvgTextAlign(args.vg, NVG_ALIGN_TOP);
 
-		nvgBeginPath(args.vg);
-		nvgRect(args.vg, 0.f, 0.f, box.size.x, box.size.y);
-		nvgFillColor(args.vg, nvgRGB(0, 16, 90));
-		nvgFill(args.vg);
+		nvgText(args.vg, 0, 0, text.c_str(), NULL);
+	}
+};
+
+struct MoreIdeasKnobM : RoundKnob {
+	MoreIdeasKnobM() {
+		snap = true;
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/more-ideas/knob_m.svg")));
+	}
+};
+
+struct MoreIdeasPort : SvgPort {
+	MoreIdeasPort() {
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/more-ideas/port.svg")));
 	}
 };
 
@@ -198,38 +272,45 @@ struct More_ideasWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		
+		TextFramebufferWidget* tfb = new TextFramebufferWidget(module);
+		TextDrawWidget* tdw = new TextDrawWidget(module);
+		tdw->box.size = mm2px(Vec(40.0, 18.0));
+		tfb->box.pos = mm2px(Vec(14, 96.66));
+		tfb->addChild(tdw);
+		addChild(tfb);
+
 		CaFramebufferWidget* cfb = new CaFramebufferWidget(module);
 		CaDrawWidget* cdw = new CaDrawWidget(module);
-		cdw->box.size = mm2px(Vec(42.0, 42.0));
-		cfb->box.pos = mm2px(Vec(2.54, 17.5));
+		cdw->box.size = mm2px(Vec(40.0, 40.0));
+		cfb->box.pos = mm2px(Vec(3.54, 18.5));
 		cfb->addChild(cdw);
 		addChild(cfb);
 
-		addParam(createParamCentered<IlKnobM>(mm2px(Vec(17.229, 66.425)), module, More_ideas::RULE_PARAM));
-		addParam(createParamCentered<IlKnobM>(mm2px(Vec(39.99, 66.421)), module, More_ideas::SEED_PARAM));
-		addParam(createParamCentered<IlKnobM>(mm2px(Vec(17.229, 79.201)), module, More_ideas::LOW_PARAM));
-		addParam(createParamCentered<IlKnobM>(mm2px(Vec(39.99, 79.196)), module, More_ideas::HIGH_PARAM));
-		addParam(createParamCentered<IlKnobM>(mm2px(Vec(17.229, 91.976)), module, More_ideas::SCALE_PARAM));
-		addParam(createParamCentered<IlKnobM>(mm2px(Vec(39.99, 91.972)), module, More_ideas::SELECT_PARAM));
+		addParam(createParamCentered<MoreIdeasKnobM>(mm2px(Vec(17.229, 66.425)), module, More_ideas::RULE_PARAM));
+		addParam(createParamCentered<MoreIdeasKnobM>(mm2px(Vec(39.99, 66.421)), module, More_ideas::SEED_PARAM));
+		addParam(createParamCentered<MoreIdeasKnobM>(mm2px(Vec(17.229, 79.201)), module, More_ideas::LOW_PARAM));
+		addParam(createParamCentered<MoreIdeasKnobM>(mm2px(Vec(39.99, 79.196)), module, More_ideas::HIGH_PARAM));
+		addParam(createParamCentered<MoreIdeasKnobM>(mm2px(Vec(17.229, 91.976)), module, More_ideas::SCALE_PARAM));
+		addParam(createParamCentered<MoreIdeasKnobM>(mm2px(Vec(39.99, 91.972)), module, More_ideas::SELECT_PARAM));
 
-		addInput(createInputCentered<IlPort>(mm2px(Vec(7.428, 66.436)), module, More_ideas::RULE_INPUT));
-		addInput(createInputCentered<IlPort>(mm2px(Vec(30.279, 66.436)), module, More_ideas::SEED_INPUT));
-		addInput(createInputCentered<IlPort>(mm2px(Vec(7.428, 79.204)), module, More_ideas::LOW_INPUT));
-		addInput(createInputCentered<IlPort>(mm2px(Vec(30.279, 79.204)), module, More_ideas::HIGH_INPUT));
-		addInput(createInputCentered<IlPort>(mm2px(Vec(7.428, 91.973)), module, More_ideas::SCALE_INPUT));
-		addInput(createInputCentered<IlPort>(mm2px(Vec(30.279, 91.973)), module, More_ideas::SELECT_INPUT));
-		addInput(createInputCentered<IlPort>(mm2px(Vec(7.428, 107.341)), module, More_ideas::CLOCK_INPUT));
+		addInput(createInputCentered<MoreIdeasPort>(mm2px(Vec(7.428, 66.436)), module, More_ideas::RULE_INPUT));
+		addInput(createInputCentered<MoreIdeasPort>(mm2px(Vec(30.279, 66.436)), module, More_ideas::SEED_INPUT));
+		addInput(createInputCentered<MoreIdeasPort>(mm2px(Vec(7.428, 79.204)), module, More_ideas::LOW_INPUT));
+		addInput(createInputCentered<MoreIdeasPort>(mm2px(Vec(30.279, 79.204)), module, More_ideas::HIGH_INPUT));
+		addInput(createInputCentered<MoreIdeasPort>(mm2px(Vec(7.428, 91.973)), module, More_ideas::SCALE_INPUT));
+		addInput(createInputCentered<MoreIdeasPort>(mm2px(Vec(30.279, 91.973)), module, More_ideas::SELECT_INPUT));
+		addInput(createInputCentered<MoreIdeasPort>(mm2px(Vec(7.428, 107.341)), module, More_ideas::CLOCK_INPUT));
 
-		addOutput(createOutputCentered<IlPort>(mm2px(Vec(54.548, 23.84)), module, More_ideas::BIT_OUTPUTS + 0));
-		addOutput(createOutputCentered<IlPort>(mm2px(Vec(54.548, 34.223)), module, More_ideas::BIT_OUTPUTS + 1));
-		addOutput(createOutputCentered<IlPort>(mm2px(Vec(54.548, 44.606)), module, More_ideas::BIT_OUTPUTS + 2));
-		addOutput(createOutputCentered<IlPort>(mm2px(Vec(54.548, 54.989)), module, More_ideas::BIT_OUTPUTS + 3));
-		addOutput(createOutputCentered<IlPort>(mm2px(Vec(54.548, 65.373)), module, More_ideas::BIT_OUTPUTS + 4));
-		addOutput(createOutputCentered<IlPort>(mm2px(Vec(54.548, 75.756)), module, More_ideas::BIT_OUTPUTS + 5));
-		addOutput(createOutputCentered<IlPort>(mm2px(Vec(54.548, 86.139)), module, More_ideas::BIT_OUTPUTS + 6));
-		addOutput(createOutputCentered<IlPort>(mm2px(Vec(54.548, 96.522)), module, More_ideas::BIT_OUTPUTS + 7));
-		addOutput(createOutputCentered<IlPort>(mm2px(Vec(44.056, 107.304)), module, More_ideas::PITCH_OUTPUT));
-		addOutput(createOutputCentered<IlPort>(mm2px(Vec(54.545, 107.304)), module, More_ideas::SELECTED_TRIGGER_OUTPUT));
+		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 23.84)), module, More_ideas::BIT_OUTPUTS + 0));
+		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 34.223)), module, More_ideas::BIT_OUTPUTS + 1));
+		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 44.606)), module, More_ideas::BIT_OUTPUTS + 2));
+		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 54.989)), module, More_ideas::BIT_OUTPUTS + 3));
+		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 65.373)), module, More_ideas::BIT_OUTPUTS + 4));
+		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 75.756)), module, More_ideas::BIT_OUTPUTS + 5));
+		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 86.139)), module, More_ideas::BIT_OUTPUTS + 6));
+		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 96.522)), module, More_ideas::BIT_OUTPUTS + 7));
+		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(44.056, 107.304)), module, More_ideas::PITCH_OUTPUT));
+		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.545, 107.304)), module, More_ideas::SELECTED_TRIGGER_OUTPUT));
 
 		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(49.798, 21.204)), module, More_ideas::SELECTED_LIGHTS + 0));
 		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(49.798, 31.519)), module, More_ideas::SELECTED_LIGHTS + 1));

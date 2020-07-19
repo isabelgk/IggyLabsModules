@@ -1,6 +1,6 @@
 #include <bitset>
-#include <cstdlib>
 #include <math.h>
+#include <vector>
 
 
 namespace MoreIdeas {
@@ -51,6 +51,26 @@ namespace MoreIdeas {
             AHIRBHAIRAV,
             CHROMATIC,
             NUM_SCALES
+        };
+
+        std::string scaleNames[NUM_SCALES] = {
+            "ionian",
+            "aeolian",
+            "dorian",
+            "phrygian",
+            "lydian",
+            "mixolydian",
+            "major pent",
+            "minor pent",
+            "shang",
+            "jiao",
+            "zhi",
+            "todi",
+            "purvi",
+            "marva",
+            "bhairav",
+            "ahirbhairav",
+            "chromatic"
         };
 
         int scales[NUM_SCALES][29] = {
@@ -175,33 +195,65 @@ namespace MoreIdeas {
 
 
     struct CA {
-        static constexpr int rule = 180;
-        static constexpr int rowLength = 64;
-        static constexpr int numRows = 64;
+        std::vector<std::vector<int>> cells;
 
-        int cells[numRows][rowLength];
+        CA(int rule, int seed, int size) {
+            this->cells = std::vector<std::vector<int>>();
+            std::bitset<8> ruleset = std::bitset<8>(rule);
+            std::bitset<8> seedset = std::bitset<8>(seed);
 
-        std::bitset<8> ruleset;
+            this->cells.push_back({});
+            for (int i = 0; i < size; i++) {
 
-        CA() {
-            ruleset = std::bitset<8>(rule);
-            // Set the first seed row to random values
-            for (int i = 0; i < rowLength; i++) {
-                cells[0][i] = std::rand() % 2;
-            }
-
-            // Do the rest of the rows
-            for (int i = 1; i < numRows; i++) {
-                for (int j = 1; j < rowLength - 1; j++) {
-                    cells[i][j] = applyRule(cells[i - 1][j - 1], cells[i - 1][j], cells[i - 1][j + 1]);
+                // Make the middle 8 cells the seed bits
+                int leftIndex = size / 2 - 3;
+                int rightIndex = size / 2 + 4;
+                if (i < leftIndex || i > rightIndex) {
+                    this->cells[0].push_back(0);
+                } else {
+                    this->cells[0].push_back(seedset[i - leftIndex]);
                 }
+
             }
+
+            // Fill out the remaining generations
+            for (int i = 1; i < size; i++) {
+                this->cells.push_back({});
+
+                // Leftmost wrap
+                int left = this->cells[i-1][size];
+                int center = this->cells[i-1][0];
+                int right = this->cells[i-1][1];
+                int index = (int) left * 4 + center * 2 + right;
+                this->cells[i].push_back(ruleset[index]);
+
+
+                // Center cells
+                for (int j = 1; j < size - 1; j++) {
+                    // Apply the ruleset
+                    left = this->cells[i - 1][j - 1];
+                    center = this->cells[i - 1][j];
+                    right =  this->cells[i - 1][j + 1];
+                    index = (int) left * 4 + center * 2 + right;
+
+                    // Add to row of 2D matrix
+                    this->cells[i].push_back(ruleset[index]);
+                }
+
+                // Rightmost wrap
+                left = this->cells[i-1][size - 1];
+                center = this->cells[i-1][size];
+                right = this->cells[i-1][0];
+                index = (int) left * 4 + center * 2 + right;
+                this->cells[i].push_back(ruleset[index]);
+            }
+
         }
 
-        int applyRule(int a, int b, int c) {
-            int index = (int) a * 4 + b * 2 + c;
-            return ruleset[index];
+        std::vector<std::vector<int>> getCells() {
+            return cells;
         }
+
     };
 
 
