@@ -6,7 +6,6 @@
 #include "../plugin.hpp"
 #include "osdialog.h"
 
-#include "widgets.hpp"
 #include "../dsp/osc/wavetable.cpp"
 
 
@@ -193,6 +192,18 @@ struct PresetWavetableMenu : MenuItem {
 
 		return menu;
 	}
+};
+
+struct IlKnobS : RoundKnob {
+    IlKnobS() {
+        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/table/knob_s.svg")));
+    }
+};
+
+struct IlPort : SvgPort {
+    IlPort() {
+        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/table/port.svg")));
+    }
 };
 
 struct TableWidget : ModuleWidget {
