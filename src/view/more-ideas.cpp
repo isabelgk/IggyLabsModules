@@ -5,6 +5,10 @@
 #include "../model/more-ideas-model.cpp"
 #include "../util/util.hpp"
 
+// TODO:
+// - Color scheme names
+// - Change light colors to match
+// - Subsampling
 
 struct More_ideas : Module {
 	enum ParamIds {
@@ -267,21 +271,21 @@ struct TextDrawWidget : OpaqueWidget {
 
 struct CyanSwitch : app::SvgSwitch {
 	CyanSwitch() {
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/more-ideas/switch_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/more-ideas/switch_1.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/cyan/switch_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/cyan/switch_1.svg")));
 	}
 };
 
-struct MoreIdeasKnobM : RoundKnob {
-	MoreIdeasKnobM() {
+struct CyanKnob : RoundKnob {
+	CyanKnob() {
 		snap = true;
-		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/more-ideas/knob_m.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/cyan/knob_m.svg")));
 	}
 };
 
-struct MoreIdeasPort : SvgPort {
-	MoreIdeasPort() {
-		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/more-ideas/port.svg")));
+struct CyanPort : SvgPort {
+	CyanPort() {
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/cyan/port.svg")));
 	}
 };
 
@@ -290,10 +294,10 @@ struct More_ideasWidget : ModuleWidget {
 		setModule(module);
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/more-ideas.svg")));
 
-		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<ScrewSilver>(Vec(0, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(0, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		
 		TextFramebufferWidget* tfb = new TextFramebufferWidget(module);
 		TextDrawWidget* tdw = new TextDrawWidget(module);
@@ -311,31 +315,31 @@ struct More_ideasWidget : ModuleWidget {
 
 		addParam(createParam<CyanSwitch>(mm2px(Vec(33.75, 106)), module, More_ideas::PITCH_OUTPUT_PARAM));
 
-		addParam(createParamCentered<MoreIdeasKnobM>(mm2px(Vec(17.229, 66.425)), module, More_ideas::RULE_PARAM));
-		addParam(createParamCentered<MoreIdeasKnobM>(mm2px(Vec(39.99, 66.421)), module, More_ideas::SEED_PARAM));
-		addParam(createParamCentered<MoreIdeasKnobM>(mm2px(Vec(17.229, 79.201)), module, More_ideas::LOW_PARAM));
-		addParam(createParamCentered<MoreIdeasKnobM>(mm2px(Vec(39.99, 79.196)), module, More_ideas::HIGH_PARAM));
-		addParam(createParamCentered<MoreIdeasKnobM>(mm2px(Vec(17.229, 91.976)), module, More_ideas::SCALE_PARAM));
-		addParam(createParamCentered<MoreIdeasKnobM>(mm2px(Vec(39.99, 91.972)), module, More_ideas::SELECT_PARAM));
+		addParam(createParamCentered<CyanKnob>(mm2px(Vec(17.229, 66.425)), module, More_ideas::RULE_PARAM));
+		addParam(createParamCentered<CyanKnob>(mm2px(Vec(39.99, 66.421)), module, More_ideas::SEED_PARAM));
+		addParam(createParamCentered<CyanKnob>(mm2px(Vec(17.229, 79.201)), module, More_ideas::LOW_PARAM));
+		addParam(createParamCentered<CyanKnob>(mm2px(Vec(39.99, 79.196)), module, More_ideas::HIGH_PARAM));
+		addParam(createParamCentered<CyanKnob>(mm2px(Vec(17.229, 91.976)), module, More_ideas::SCALE_PARAM));
+		addParam(createParamCentered<CyanKnob>(mm2px(Vec(39.99, 91.972)), module, More_ideas::SELECT_PARAM));
 
-		addInput(createInputCentered<MoreIdeasPort>(mm2px(Vec(7.428, 66.436)), module, More_ideas::RULE_INPUT));
-		addInput(createInputCentered<MoreIdeasPort>(mm2px(Vec(30.279, 66.436)), module, More_ideas::SEED_INPUT));
-		addInput(createInputCentered<MoreIdeasPort>(mm2px(Vec(7.428, 79.204)), module, More_ideas::LOW_INPUT));
-		addInput(createInputCentered<MoreIdeasPort>(mm2px(Vec(30.279, 79.204)), module, More_ideas::HIGH_INPUT));
-		addInput(createInputCentered<MoreIdeasPort>(mm2px(Vec(7.428, 91.973)), module, More_ideas::SCALE_INPUT));
-		addInput(createInputCentered<MoreIdeasPort>(mm2px(Vec(30.279, 91.973)), module, More_ideas::SELECT_INPUT));
-		addInput(createInputCentered<MoreIdeasPort>(mm2px(Vec(7.428, 107.341)), module, More_ideas::CLOCK_INPUT));
+		addInput(createInputCentered<CyanPort>(mm2px(Vec(7.428, 66.436)), module, More_ideas::RULE_INPUT));
+		addInput(createInputCentered<CyanPort>(mm2px(Vec(30.279, 66.436)), module, More_ideas::SEED_INPUT));
+		addInput(createInputCentered<CyanPort>(mm2px(Vec(7.428, 79.204)), module, More_ideas::LOW_INPUT));
+		addInput(createInputCentered<CyanPort>(mm2px(Vec(30.279, 79.204)), module, More_ideas::HIGH_INPUT));
+		addInput(createInputCentered<CyanPort>(mm2px(Vec(7.428, 91.973)), module, More_ideas::SCALE_INPUT));
+		addInput(createInputCentered<CyanPort>(mm2px(Vec(30.279, 91.973)), module, More_ideas::SELECT_INPUT));
+		addInput(createInputCentered<CyanPort>(mm2px(Vec(7.428, 107.341)), module, More_ideas::CLOCK_INPUT));
 
-		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 23.84)), module, More_ideas::BIT_OUTPUTS + 0));
-		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 34.223)), module, More_ideas::BIT_OUTPUTS + 1));
-		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 44.606)), module, More_ideas::BIT_OUTPUTS + 2));
-		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 54.989)), module, More_ideas::BIT_OUTPUTS + 3));
-		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 65.373)), module, More_ideas::BIT_OUTPUTS + 4));
-		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 75.756)), module, More_ideas::BIT_OUTPUTS + 5));
-		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 86.139)), module, More_ideas::BIT_OUTPUTS + 6));
-		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.548, 96.522)), module, More_ideas::BIT_OUTPUTS + 7));
-		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(44.056, 107.304)), module, More_ideas::PITCH_OUTPUT));
-		addOutput(createOutputCentered<MoreIdeasPort>(mm2px(Vec(54.545, 107.304)), module, More_ideas::SELECTED_TRIGGER_OUTPUT));
+		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.548, 23.84)), module, More_ideas::BIT_OUTPUTS + 0));
+		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.548, 34.223)), module, More_ideas::BIT_OUTPUTS + 1));
+		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.548, 44.606)), module, More_ideas::BIT_OUTPUTS + 2));
+		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.548, 54.989)), module, More_ideas::BIT_OUTPUTS + 3));
+		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.548, 65.373)), module, More_ideas::BIT_OUTPUTS + 4));
+		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.548, 75.756)), module, More_ideas::BIT_OUTPUTS + 5));
+		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.548, 86.139)), module, More_ideas::BIT_OUTPUTS + 6));
+		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.548, 96.522)), module, More_ideas::BIT_OUTPUTS + 7));
+		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(44.056, 107.304)), module, More_ideas::PITCH_OUTPUT));
+		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.545, 107.304)), module, More_ideas::SELECTED_TRIGGER_OUTPUT));
 
 		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(49.798, 21.204)), module, More_ideas::SELECTED_LIGHTS + 0));
 		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(49.798, 31.519)), module, More_ideas::SELECTED_LIGHTS + 1));

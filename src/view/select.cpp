@@ -56,16 +56,16 @@ struct Select : Module {
 	}
 };
 
-struct SelectKnob : RoundKnob {
-    SelectKnob() {
+struct PurpleKnob : RoundKnob {
+    PurpleKnob() {
 		snap = true;
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/select/knob_m.svg")));
+        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/purple/knob_m.svg")));
     }
 };
 
-struct SelectPort : SvgPort {
-    SelectPort() {
-        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/select/port.svg")));
+struct PurplePort : SvgPort {
+    PurplePort() {
+        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/purple/port.svg")));
     }
 };
 
@@ -80,26 +80,26 @@ struct SelectWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(0, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParamCentered<SelectKnob>(mm2px(Vec(7.877, 107.036)), module, Select::SELECT_PARAM));
+		addParam(createParamCentered<PurpleKnob>(mm2px(Vec(7.877, 107.036)), module, Select::SELECT_PARAM));
 
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(7.877, 23.805)), module, Select::INPUTS + 0));
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(7.877, 34.187)), module, Select::INPUTS + 1));
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(7.877, 44.569)), module, Select::INPUTS + 2));
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(7.877, 54.951)), module, Select::INPUTS + 3));
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(7.877, 65.333)), module, Select::INPUTS + 4));
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(7.877, 75.715)), module, Select::INPUTS + 5));
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(7.877, 86.097)), module, Select::INPUTS + 6));
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(7.877, 96.478)), module, Select::INPUTS + 7));
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(18.933, 23.805)), module, Select::INPUTS + 8));
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(18.933, 34.187)), module, Select::INPUTS + 9));
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(18.933, 44.569)), module, Select::INPUTS + 10));
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(18.933, 54.951)), module, Select::INPUTS + 11));
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(18.933, 65.333)), module, Select::INPUTS + 12));
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(18.933, 75.715)), module, Select::INPUTS + 13));
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(18.933, 86.097)), module, Select::INPUTS + 14));
-		addInput(createInputCentered<SelectPort>(mm2px(Vec(18.933, 96.478)), module, Select::INPUTS + 15));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(7.877, 23.805)), module, Select::INPUTS + 0));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(7.877, 34.187)), module, Select::INPUTS + 1));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(7.877, 44.569)), module, Select::INPUTS + 2));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(7.877, 54.951)), module, Select::INPUTS + 3));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(7.877, 65.333)), module, Select::INPUTS + 4));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(7.877, 75.715)), module, Select::INPUTS + 5));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(7.877, 86.097)), module, Select::INPUTS + 6));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(7.877, 96.478)), module, Select::INPUTS + 7));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(18.933, 23.805)), module, Select::INPUTS + 8));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(18.933, 34.187)), module, Select::INPUTS + 9));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(18.933, 44.569)), module, Select::INPUTS + 10));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(18.933, 54.951)), module, Select::INPUTS + 11));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(18.933, 65.333)), module, Select::INPUTS + 12));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(18.933, 75.715)), module, Select::INPUTS + 13));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(18.933, 86.097)), module, Select::INPUTS + 14));
+		addInput(createInputCentered<PurplePort>(mm2px(Vec(18.933, 96.478)), module, Select::INPUTS + 15));
 
-		addOutput(createOutputCentered<SelectPort>(mm2px(Vec(18.933, 107.036)), module, Select::THRU_OUTPUT));
+		addOutput(createOutputCentered<PurplePort>(mm2px(Vec(18.933, 107.036)), module, Select::THRU_OUTPUT));
 
 		addChild(createLightCentered<SmallLight<WhiteLight>>(mm2px(Vec(3.505, 20.017)), module, Select::LIGHTS + 0));
 		addChild(createLightCentered<SmallLight<WhiteLight>>(mm2px(Vec(3.505, 30.397)), module, Select::LIGHTS + 1));
