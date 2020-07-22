@@ -96,7 +96,7 @@ namespace MoreIdeas {
         // Scale seeds to the note pool and range selected
         int scaleSeedsToNotePool(int lo, int hi, int received) {
             float r = received;
-            return floor((((r - 1.f) / (255.f)) * ((hi - lo) + lo)));
+            return floor((((r - 1.f) / (255.f)) * (fabs(hi - lo) + std::min(lo, hi))));
         }
 
         void setSeed(int _seed) {

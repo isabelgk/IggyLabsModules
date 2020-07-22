@@ -8,7 +8,6 @@
 // TODO:
 // - Change light colors to match
 // - Refactor updating params
-// - Handle min max better
 
 struct More_ideas : Module {
 	enum ParamIds {
