@@ -14,6 +14,7 @@ struct More_ideas : Module {
 		HIGH_PARAM,
 		SELECT_PARAM,
 		SCALE_PARAM,
+		PITCH_OUTPUT_PARAM,
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -56,12 +57,27 @@ struct More_ideas : Module {
 		configParam(HIGH_PARAM, 0.f, 28.f, 14.f, "High");
 		configParam(SCALE_PARAM, 0.f, 16.f, 0.f, "Scale");
 		configParam(SELECT_PARAM, 0.f, 7.f, 0.f, "Select");
+		configParam(PITCH_OUTPUT_PARAM, 0.0, 1.0, 1.0, "Pitch output mode");
 	}
 
 	void onTrigger(const ProcessArgs& args) {
 		this->stateModel->onTrigger();
 
-		outputs[PITCH_OUTPUT].setVoltage(iggylabs::dsp::semitoneToCV(float(this->stateModel->note)));
+		// Update the pitch if the mode is set to always update the pitch
+		// or if the mode is set to update when the selected trigger is on
+		// and the trigger is indeed on
+		bool alwaysUpdate = int(params[PITCH_OUTPUT_PARAM].getValue());
+		int currentBit = this->stateModel->bit;
+		bool currentBitOn;
+		if (this->stateModel->generation == nullptr) {
+			currentBitOn = this->stateModel->seed->binaryArray[currentBit];
+		} else {
+			currentBitOn = this->stateModel->generation->binaryArray[currentBit];
+		}
+
+		if ((!alwaysUpdate && currentBitOn) || alwaysUpdate){
+			outputs[PITCH_OUTPUT].setVoltage(iggylabs::dsp::semitoneToCV(float(this->stateModel->note)));
+		}
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -249,6 +265,13 @@ struct TextDrawWidget : OpaqueWidget {
 	}
 };
 
+struct CyanSwitch : app::SvgSwitch {
+	CyanSwitch() {
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/more-ideas/switch_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/more-ideas/switch_1.svg")));
+	}
+};
+
 struct MoreIdeasKnobM : RoundKnob {
 	MoreIdeasKnobM() {
 		snap = true;
@@ -285,6 +308,8 @@ struct More_ideasWidget : ModuleWidget {
 		cfb->box.pos = mm2px(Vec(3.54, 18.5));
 		cfb->addChild(cdw);
 		addChild(cfb);
+
+		addParam(createParam<CyanSwitch>(mm2px(Vec(33.75, 106)), module, More_ideas::PITCH_OUTPUT_PARAM));
 
 		addParam(createParamCentered<MoreIdeasKnobM>(mm2px(Vec(17.229, 66.425)), module, More_ideas::RULE_PARAM));
 		addParam(createParamCentered<MoreIdeasKnobM>(mm2px(Vec(39.99, 66.421)), module, More_ideas::SEED_PARAM));
