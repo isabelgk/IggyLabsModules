@@ -6,9 +6,9 @@
 #include "../util/util.hpp"
 
 // TODO:
-// - Color scheme names
 // - Change light colors to match
-// - Subsampling
+// - Refactor updating params
+// - Handle min max better
 
 struct More_ideas : Module {
 	enum ParamIds {
@@ -45,11 +45,11 @@ struct More_ideas : Module {
 
 	Trigger clockTrigger;
 	MoreIdeas::Model *stateModel = new MoreIdeas::Model();
+	int loopCounter = 0;
 
 	int gridWidth = 64;
 	MoreIdeas::CA* ca = nullptr;
 	bool caDirty = true;
-	
 	bool scaleTextDirty = true;
 
 
@@ -61,7 +61,7 @@ struct More_ideas : Module {
 		configParam(HIGH_PARAM, 0.f, 28.f, 14.f, "High");
 		configParam(SCALE_PARAM, 0.f, 16.f, 0.f, "Scale");
 		configParam(SELECT_PARAM, 0.f, 7.f, 0.f, "Select");
-		configParam(PITCH_OUTPUT_PARAM, 0.0, 1.0, 1.0, "Pitch output mode");
+		configParam(PITCH_OUTPUT_PARAM, 0.0, 1.0, 0.0, "Pitch output mode");
 	}
 
 	void onTrigger(const ProcessArgs& args) {
@@ -84,7 +84,8 @@ struct More_ideas : Module {
 		}
 	}
 
-	void process(const ProcessArgs& args) override {
+	void subSampledProcess(const ProcessArgs& args) {
+
 		if (this->clockTrigger.process(inputs[CLOCK_INPUT].getVoltage())) {
 			onTrigger(args);
 		}
@@ -179,6 +180,13 @@ struct More_ideas : Module {
 		}
 		select = clamp(select, 0.f, 7.f);
 		stateModel->bit = floor(select);
+	}
+
+	void process(const ProcessArgs& args) override {
+		if (loopCounter-- == 0) {
+			loopCounter = 8;
+			subSampledProcess(args);
+		}
 	}
 };
 

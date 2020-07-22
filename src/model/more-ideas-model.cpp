@@ -189,7 +189,7 @@ namespace MoreIdeas {
                 noteInd = scaleSeedsToNotePool(low, high, this->generation->integer + 1);
             }
 
-            this->note = 60 + this->oct + this->semitone + this->scales[this->scaleIndex][noteInd];
+            this->note = 48 + this->oct + this->semitone + this->scales[this->scaleIndex][noteInd];
         }
     };
 
