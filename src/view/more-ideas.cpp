@@ -6,8 +6,8 @@
 #include "../util/util.hpp"
 
 // TODO:
-// - Change light colors to match
 // - Refactor updating params
+// - Right click menu raw output range options
 
 struct More_ideas : Module {
 	enum ParamIds {
@@ -17,7 +17,8 @@ struct More_ideas : Module {
 		HIGH_PARAM,
 		SELECT_PARAM,
 		SCALE_PARAM,
-		PITCH_OUTPUT_PARAM,
+		CLOCK_OUT_PARAM,
+		QUANTIZE_PARAM,
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -32,8 +33,8 @@ struct More_ideas : Module {
 	};
 	enum OutputIds {
 		ENUMS(BIT_OUTPUTS, 8),
-		PITCH_OUTPUT,
-		SELECTED_TRIGGER_OUTPUT,
+		CV_OUTPUT,
+		CLOCK_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -51,6 +52,8 @@ struct More_ideas : Module {
 	bool caDirty = true;
 	bool scaleTextDirty = true;
 
+	int rangeIndex = 0;
+
 
 	More_ideas() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -60,16 +63,18 @@ struct More_ideas : Module {
 		configParam(HIGH_PARAM, 0.f, 28.f, 14.f, "High");
 		configParam(SCALE_PARAM, 0.f, 16.f, 0.f, "Scale");
 		configParam(SELECT_PARAM, 0.f, 7.f, 0.f, "Select");
-		configParam(PITCH_OUTPUT_PARAM, 0.0, 1.0, 0.0, "Pitch output mode");
+		configParam(CLOCK_OUT_PARAM, 0.f, 1.f, 0.f, "Clock output mode");
+		configParam(QUANTIZE_PARAM, 0.0, 1.f, 0.f, "Quantize output");
 	}
 
 	void onTrigger(const ProcessArgs& args) {
+		this->stateModel->quantizeOutput = !int(params[QUANTIZE_PARAM].getValue());
 		this->stateModel->onTrigger();
 
 		// Update the pitch if the mode is set to always update the pitch
 		// or if the mode is set to update when the selected trigger is on
 		// and the trigger is indeed on
-		bool alwaysUpdate = int(params[PITCH_OUTPUT_PARAM].getValue());
+		bool alwaysUpdate = int(params[CLOCK_OUT_PARAM].getValue());
 		int currentBit = this->stateModel->bit;
 		bool currentBitOn;
 		if (this->stateModel->generation == nullptr) {
@@ -79,7 +84,11 @@ struct More_ideas : Module {
 		}
 
 		if ((!alwaysUpdate && currentBitOn) || alwaysUpdate){
-			outputs[PITCH_OUTPUT].setVoltage(iggylabs::dsp::semitoneToCV(float(this->stateModel->note)));
+			if (this->stateModel->quantizeOutput) {
+				outputs[CV_OUTPUT].setVoltage(iggylabs::dsp::semitoneToCV(float(this->stateModel->note)));
+			} else {
+				outputs[CV_OUTPUT].setVoltage(this->stateModel->rawCvOut);
+			}
 		}
 	}
 
@@ -94,13 +103,13 @@ struct More_ideas : Module {
 				outputs[BIT_OUTPUTS + i].setVoltage(clockTrigger.isHigh() && this->stateModel->seed->binaryArray[i] ? 10.f : 0.f);
 
 				if (i == this->stateModel->bit) {
-					outputs[SELECTED_TRIGGER_OUTPUT].setVoltage(clockTrigger.isHigh() && this->stateModel->seed->binaryArray[i] ? 10.f : 0.f);
+					outputs[CLOCK_OUTPUT].setVoltage(clockTrigger.isHigh() && this->stateModel->seed->binaryArray[i] ? 10.f : 0.f);
 				}
 
 			} else {
 				outputs[BIT_OUTPUTS + i].setVoltage(clockTrigger.isHigh() && this->stateModel->generation->binaryArray[i] ? 10.f : 0.f);
 				if (i == this->stateModel->bit) {
-					outputs[SELECTED_TRIGGER_OUTPUT].setVoltage(clockTrigger.isHigh() && this->stateModel->generation->binaryArray[i] ? 10.f : 0.f);
+					outputs[CLOCK_OUTPUT].setVoltage(clockTrigger.isHigh() && this->stateModel->generation->binaryArray[i] ? 10.f : 0.f);
 				}
 			}
 		}
@@ -296,6 +305,15 @@ struct CyanPort : SvgPort {
 	}
 };
 
+struct MenuItemRawCvOutRange : MenuItem {
+	More_ideas* module;
+	int ind;
+
+	void onAction(const event::Action& e) override {
+		module->stateModel->cvRangeIndex = ind;
+	}
+};
+
 struct More_ideasWidget : ModuleWidget {
 	More_ideasWidget(More_ideas* module) {
 		setModule(module);
@@ -320,7 +338,8 @@ struct More_ideasWidget : ModuleWidget {
 		cfb->addChild(cdw);
 		addChild(cfb);
 
-		addParam(createParam<CyanSwitch>(mm2px(Vec(33.75, 106)), module, More_ideas::PITCH_OUTPUT_PARAM));
+		addParam(createParam<CyanSwitch>(mm2px(Vec(45.9, 106)), module, More_ideas::CLOCK_OUT_PARAM));
+		addParam(createParam<CyanSwitch>(mm2px(Vec(30.16, 106)), module, More_ideas::QUANTIZE_PARAM));
 
 		addParam(createParamCentered<CyanKnob>(mm2px(Vec(17.229, 66.425)), module, More_ideas::RULE_PARAM));
 		addParam(createParamCentered<CyanKnob>(mm2px(Vec(39.99, 66.421)), module, More_ideas::SEED_PARAM));
@@ -345,8 +364,8 @@ struct More_ideasWidget : ModuleWidget {
 		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.548, 75.756)), module, More_ideas::BIT_OUTPUTS + 5));
 		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.548, 86.139)), module, More_ideas::BIT_OUTPUTS + 6));
 		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.548, 96.522)), module, More_ideas::BIT_OUTPUTS + 7));
-		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(44.056, 107.304)), module, More_ideas::PITCH_OUTPUT));
-		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.545, 107.304)), module, More_ideas::SELECTED_TRIGGER_OUTPUT));
+		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(39.537, 107.304)), module, More_ideas::CV_OUTPUT));
+		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.545, 107.304)), module, More_ideas::CLOCK_OUTPUT));
 
 		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(49.798, 21.204)), module, More_ideas::SELECTED_LIGHTS + 0));
 		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(49.798, 31.519)), module, More_ideas::SELECTED_LIGHTS + 1));
@@ -364,7 +383,25 @@ struct More_ideasWidget : ModuleWidget {
 		addChild(createLightCentered<SmallLight<WhiteLight>>(mm2px(Vec(51.971, 70.985)), module, More_ideas::TRIGGERED_LIGHTS + 5));
 		addChild(createLightCentered<SmallLight<WhiteLight>>(mm2px(Vec(51.971, 81.301)), module, More_ideas::TRIGGERED_LIGHTS + 6));
 		addChild(createLightCentered<SmallLight<WhiteLight>>(mm2px(Vec(51.971, 91.616)), module, More_ideas::TRIGGERED_LIGHTS + 7));
+	}
 
+	void appendContextMenu(Menu* menu) override {
+		More_ideas* module = dynamic_cast<More_ideas*>(this->module);
+
+		// CV Ranges
+		menu->addChild(new MenuSeparator());
+		MenuItem* label = new MenuItem;
+		label->disabled = true;
+		label->text = "Raw CV output range";
+		menu->addChild(label);
+
+		for (int i = 0; i < module->stateModel->NUM_CV_RANGES; i++) {
+			MenuItemRawCvOutRange* item = new MenuItemRawCvOutRange;
+			item->module = module;
+			item->text = module->stateModel->cvRangeNames[i];
+			item->ind = i;
+			menu->addChild(item);
+		}
 	}
 };
 

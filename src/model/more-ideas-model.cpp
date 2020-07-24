@@ -21,17 +21,42 @@ namespace MoreIdeas {
         
 
     struct Model {
-        int bit;
-        int note;
-        int oct = 0;
-        int semitone = 0;
-        int low = 1;
-        int high = 14;
-        int scaleIndex = 0;
-        Binary *seed = new Binary(0);
-        Binary *generation = nullptr;
-        Binary *rule = new Binary(0);
+
         
+        enum CV_RANGES {
+            PM_10,
+            PM_5,
+            PM_3,
+            PM_1,
+            Z_10,
+            Z_5,
+            Z_3,
+            Z_1,
+            NUM_CV_RANGES
+        };
+
+        std::string cvRangeNames[NUM_CV_RANGES] = {
+            "+/- 10V",
+            "+/- 5V",
+            "+/- 3V",
+            "+/- 1V",
+            "0V - 10V",
+            "0V - 5V",
+            "0V - 3V",
+            "0V - 1V"
+        };
+
+        float cvRanges[NUM_CV_RANGES][2] = {
+            {-10.f, 10.f},
+            {-5.f, 5.f},
+            {-3.f, 3.f},
+            {-1.f, 1.f},
+            {0.f, 10.f},
+            {0.f, 5.f},
+            {0.f, 3.f},
+            {0.f, 1.f}
+        };
+
         enum ScaleEnum {
             IONIAN,
             AEOLIAN,
@@ -92,6 +117,21 @@ namespace MoreIdeas {
             {0,1,4,5,7,9,10,12,13,16,17,19,21,22,24,25,28,29,31,33,35,36,37,40,41,43,45,47,48},    // Ahirbhairav
             {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28}         // Chromatic
         };
+
+        int bit;
+        int note;
+        float rawCvOut;
+
+        bool quantizeOutput;
+        
+        int low = 1;
+        int high = 14;
+        int scaleIndex = 0;
+        int cvRangeIndex = 0;
+        
+        Binary *seed = new Binary(0);
+        Binary *generation = nullptr;
+        Binary *rule = new Binary(0);
 
         // Scale seeds to the note pool and range selected
         int scaleSeedsToNotePool(int lo, int hi, int received) {
@@ -182,14 +222,26 @@ namespace MoreIdeas {
         void onTrigger() {
             updateSeeds();
 
-            int noteInd;
-            if (generation == nullptr) {
-                noteInd = scaleSeedsToNotePool(low, high, this->seed->integer + 1);
-            } else {
-                noteInd = scaleSeedsToNotePool(low, high, this->generation->integer + 1);
-            }
+            if (quantizeOutput) {
+                int noteInd;
+                if (generation == nullptr) {
+                    noteInd = scaleSeedsToNotePool(low, high, this->seed->integer + 1);
+                } else {
+                    noteInd = scaleSeedsToNotePool(low, high, this->generation->integer + 1);
+                }
 
-            this->note = 48 + this->oct + this->semitone + this->scales[this->scaleIndex][noteInd];
+                this->note = 48 + this->scales[this->scaleIndex][noteInd];
+            } else {
+                float frac;
+                if (generation == nullptr) {
+                    frac = this->seed->integer / 255.f;
+                } else {
+                    frac = this->generation->integer / 255.f;
+                }
+                float lowCv = this->cvRanges[this->cvRangeIndex][0];
+                float highCv = this->cvRanges[this->cvRangeIndex][1];
+                this->rawCvOut = frac * (highCv - lowCv) + lowCv;
+            }
         }
     };
 
