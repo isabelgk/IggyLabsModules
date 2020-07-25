@@ -5,9 +5,6 @@
 #include "../model/more-ideas-model.cpp"
 #include "../util/util.hpp"
 
-// TODO:
-// - Refactor updating params
-// - Right click menu raw output range options
 
 struct More_ideas : Module {
 	enum ParamIds {

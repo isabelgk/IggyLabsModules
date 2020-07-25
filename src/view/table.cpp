@@ -167,8 +167,6 @@ struct PresetWavetable : MenuItem {
 
 	void onAction(const event::Action& e) override {
 		if (module->wavetable != nullptr) {
-			// TODO remove below line
-			std::string test = asset::plugin(pluginInstance, path);
 			module->loadWavetable(asset::plugin(pluginInstance, path), cycleLength);
 		}
 	}
