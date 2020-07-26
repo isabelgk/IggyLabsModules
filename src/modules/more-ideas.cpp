@@ -45,7 +45,7 @@ struct More_ideas : Module {
 	int loopCounter = 0;
 
 	int gridWidth = 64;
-	MoreIdeas::CA* ca = nullptr;
+	MoreIdeas::CA* ca = new MoreIdeas::CA(gridWidth);
 	bool caDirty = true;
 	bool scaleTextDirty = true;
 
@@ -132,7 +132,7 @@ struct More_ideas : Module {
 		if (floor(rule) != this->stateModel->rule->integer) {
 			stateModel->setRule(floor(rule));
 			this->caDirty = true;
-			this->ca = new MoreIdeas::CA(floor(rule), this->stateModel->seed->integer, this->gridWidth);
+			this->ca->setCells(floor(rule), this->stateModel->seed->integer);
 		}
 
 		// SEED
@@ -144,7 +144,7 @@ struct More_ideas : Module {
 		if (floor(seed) != this->stateModel->seed->integer) {
 			stateModel->setSeed(floor(seed));
 			this->caDirty = true;
-			this->ca = new MoreIdeas::CA(floor(rule), this->stateModel->seed->integer, this->gridWidth);
+			this->ca->setCells(floor(rule), this->stateModel->seed->integer);
 		}
 
 		// LOW
@@ -223,15 +223,16 @@ struct CaDrawWidget : OpaqueWidget {
 
 	void draw(const DrawArgs& args) override {
 		if (!module || module->ca == nullptr) return;
+		if (!module->ca->built) return;
 
 		float sizeX = box.size.x / float(module->gridWidth);
 		float sizeY = box.size.y / float(module->gridWidth);
 
-		for (int i = 0; i < module->gridWidth; i++) {
-			for (int j = 0; j < module->gridWidth; j++) {
-				if (module->ca->cells[j][i]) {
+		for (int i = 0; i < (int) module->ca->cells.size(); i++) {
+			for (int j = 0; j < (int) module->ca->cells[i].size(); j++) {
+				if (module->ca->cells[i][j]) {
 					nvgBeginPath(args.vg);
-					nvgRect(args.vg, i * sizeX, j * sizeY, sizeX, sizeY);
+					nvgRect(args.vg, j * sizeX, i * sizeY, sizeX, sizeY);
 					nvgFillColor(args.vg, nvgRGB(224, 247, 250));
 					nvgFill(args.vg);
 				}

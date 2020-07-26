@@ -19,10 +19,7 @@ namespace MoreIdeas {
         }
     };
         
-
     struct Model {
-
-        
         enum CV_RANGES {
             PM_10,
             PM_5,
@@ -129,9 +126,9 @@ namespace MoreIdeas {
         int scaleIndex = 0;
         int cvRangeIndex = 0;
         
-        Binary *seed = new Binary(0);
-        Binary *generation = nullptr;
-        Binary *rule = new Binary(0);
+        Binary* seed = new Binary(0);
+        Binary* generation = nullptr;
+        Binary* rule = new Binary(0);
 
         // Scale seeds to the note pool and range selected
         int scaleSeedsToNotePool(int lo, int hi, int received) {
@@ -248,15 +245,23 @@ namespace MoreIdeas {
 
     struct CA {
         std::vector<std::vector<int>> cells;
+        int size;
+        bool built = false;
 
-        CA(int rule, int seed, int size) {
-            this->cells = std::vector<std::vector<int>>();
+        CA(int _size) {
+            this->size = _size;
+        }
+
+        void setCells(int rule, int seed) {
+            this->built = false;
+            // Clear out any existing cell vectors
+            this->cells.clear();
             std::bitset<8> ruleset = std::bitset<8>(rule);
             std::bitset<8> seedset = std::bitset<8>(seed);
 
+            // Populate the first generation
             this->cells.push_back({});
             for (int i = 0; i < size; i++) {
-
                 // Make the middle 8 cells the seed bits
                 int leftIndex = size / 2 - 3;
                 int rightIndex = size / 2 + 4;
@@ -265,7 +270,6 @@ namespace MoreIdeas {
                 } else {
                     this->cells[0].push_back(seedset[i - leftIndex]);
                 }
-
             }
 
             // Fill out the remaining generations
@@ -278,7 +282,6 @@ namespace MoreIdeas {
                 int right = this->cells[i-1][1];
                 int index = (int) left * 4 + center * 2 + right;
                 this->cells[i].push_back(ruleset[index]);
-
 
                 // Center cells
                 for (int j = 1; j < size - 1; j++) {
@@ -300,13 +303,8 @@ namespace MoreIdeas {
                 this->cells[i].push_back(ruleset[index]);
             }
 
+            this->built = true;
         }
-
-        std::vector<std::vector<int>> getCells() {
-            return cells;
-        }
-
     };
-
 
 }  // namespace MoreIdeas
