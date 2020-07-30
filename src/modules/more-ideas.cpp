@@ -42,14 +42,13 @@ struct More_ideas : Module {
 
 	Trigger clockTrigger;
 	MoreIdeas::Model *stateModel = new MoreIdeas::Model();
+
 	int loopCounter = 0;
 
 	int gridWidth = 64;
 	MoreIdeas::CA* ca = new MoreIdeas::CA(gridWidth);
 	bool caDirty = true;
 	bool scaleTextDirty = true;
-
-	int rangeIndex = 0;
 
 
 	More_ideas() {
@@ -63,6 +62,13 @@ struct More_ideas : Module {
 		configParam(CLOCK_OUT_PARAM, 0.f, 1.f, 0.f, "Clock output mode");
 		configParam(QUANTIZE_PARAM, 0.0, 1.f, 0.f, "Quantize output");
 	}
+
+	// If Initializing the plugin were to reset the raw CV range, we would
+	// do it like this, but bogaudio doesn't reset output ranges, so this
+	// would be unexpected behavior for the user.
+	// void onReset() {
+	// 	this->stateModel->cvRangeIndex = 0;
+	// }
 
 	void onTrigger(const ProcessArgs& args) {
 		this->stateModel->quantizeOutput = !int(params[QUANTIZE_PARAM].getValue());
@@ -191,6 +197,23 @@ struct More_ideas : Module {
 		if (loopCounter-- == 0) {
 			loopCounter = 8;
 			subSampledProcess(args);
+		}
+	}
+
+	json_t* dataToJson() override {
+		json_t* rootJ = json_object();
+
+		json_object_set_new(rootJ, "lastCvRangeIndex", json_integer(this->stateModel->cvRangeIndex));
+
+		return rootJ;
+	}
+
+	void dataFromJson(json_t* rootJ) override {
+		json_t* lastCvRangeIndexJ = json_object_get(rootJ, "lastCvRangeIndex");
+
+		if (lastCvRangeIndexJ) {
+			int lastCvRangeIndex = json_integer_value(lastCvRangeIndexJ);
+			this->stateModel->cvRangeIndex = lastCvRangeIndex;
 		}
 	}
 };
@@ -397,6 +420,7 @@ struct More_ideasWidget : ModuleWidget {
 			MenuItemRawCvOutRange* item = new MenuItemRawCvOutRange;
 			item->module = module;
 			item->text = module->stateModel->cvRangeNames[i];
+			item->rightText = CHECKMARK(module->stateModel->cvRangeIndex == i);
 			item->ind = i;
 			menu->addChild(item);
 		}
