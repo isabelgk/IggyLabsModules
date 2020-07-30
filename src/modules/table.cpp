@@ -47,7 +47,7 @@ struct Table : Module {
 	}
 
 	void loadWavetable(std::string path, int cycleLength) {
-		wavetable = new Wavetable::Wavetable();
+		wavetable->clear();
 		wavetable->loadWavetable(path, cycleLength);
 		this->currentTableName = string::filenameBase(string::filename(path));
 	}
