@@ -1,14 +1,14 @@
 {
   "slug": "IggyLabsModules",
   "name": "iggy.labs",
-  "version": "1.1.0-alpha",
+  "version": "1.1.0",
   "license": "GPL-3.0-or-later",
   "brand": "iggy.labs",
   "author": "Isabel Kaspriskie",
   "authorEmail": "ikaspriskie@gmail.com",
   "authorUrl": "",
   "pluginUrl": "",
-  "manualUrl": "https://github.com/IggyLabs/IggyLabsModules/wiki/Manual",
+  "manualUrl": "https://github.com/IggyLabs/IggyLabsModulesManual",
   "sourceUrl": "https://github.com/IggyLabs/IggyLabsModules",
   "donateUrl": "https://www.buymeacoffee.com/iggylabs",
   "changelogUrl": "",
@@ -35,7 +35,9 @@
       "slug": "more-ideas",
       "name": "more-ideas",
       "description": "Elementary cellular automata sequencer (modeled after less concepts for norns)",
-      "tags": []
+      "tags": [
+        "random"
+      ]
     }
   ]
 }

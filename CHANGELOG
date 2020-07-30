@@ -1,3 +1,12 @@
+v1.1.0
+===
+Added features:
+- New module, more.ideas
+
+Bug fixes:
+- Fixed a memory leak in table
+
+
 v1.0.2
 ===
 Added features:

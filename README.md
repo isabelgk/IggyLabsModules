@@ -5,9 +5,9 @@
 
 ## Modules
 
-<img src="res/img/all.png" height=360>
+<img src="https://github.com/IggyLabs/IggyLabsModulesManual/blob/master/img/all.png" height=360>
 
-See the [wiki](https://github.com/IggyLabs/IggyLabsModules/wiki/Manual) for more information.
+See the [manual](https://github.com/IggyLabs/IggyLabsModulesManual) for more information.
 
 Subscribe to the collection in the [VCV Library](https://library.vcvrack.com/?brand=iggy.labs).
 

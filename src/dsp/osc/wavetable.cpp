@@ -52,6 +52,18 @@ namespace Wavetable {
             phaseIncs.fill(0.f);
         }
 
+        void clear() {
+            wavetableOscillators.clear();
+            lastPath = "";
+            cycleLength = MAX_CYCLE_LENGTH;
+            numCycles = 1;
+            loading = false;
+            loaded = false;
+
+            phasors.fill(0.f);
+            phaseIncs.fill(0.f);
+        }
+
         void loadWavetable(std::string path, int cl) {
             // Only update `frameSize` if valid
             for (int i = 0; i < (int) cycleLengths.size(); i++) {
