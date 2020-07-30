@@ -6,8 +6,7 @@
 #include "../plugin.hpp"
 #include "osdialog.h"
 
-#include "../widgets.hpp"
-#include "../osc/wavetable.cpp"
+#include "../dsp/osc/wavetable.cpp"
 
 
 struct Table : Module {
@@ -168,7 +167,6 @@ struct PresetWavetable : MenuItem {
 
 	void onAction(const event::Action& e) override {
 		if (module->wavetable != nullptr) {
-			std::string test = asset::plugin(pluginInstance, path);
 			module->loadWavetable(asset::plugin(pluginInstance, path), cycleLength);
 		}
 	}
@@ -195,6 +193,18 @@ struct PresetWavetableMenu : MenuItem {
 	}
 };
 
+struct GreenKnob : RoundKnob {
+    GreenKnob() {
+        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/green/knob_s.svg")));
+    }
+};
+
+struct GreenPort : SvgPort {
+    GreenPort() {
+        setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/green/port.svg")));
+    }
+};
+
 struct TableWidget : ModuleWidget {
 	TableWidget(Table* module) {
 		setModule(module);
@@ -208,17 +218,17 @@ struct TableWidget : ModuleWidget {
 		addChild(createLightCentered<SmallLight<WhiteLight>>(mm2px(Vec(5.1, 39.0)), module, Table::LOADED_LIGHT));
 
 		// Knobs
-		addParam(createParamCentered<IlKnobS>(mm2px(Vec(5.1, 46.0)), module, Table::POS_PARAM));
-		addParam(createParamCentered<IlKnobS>(mm2px(Vec(5.1, 68.0)), module, Table::FINE_PARAM));
-		addParam(createParamCentered<IlKnobS>(mm2px(Vec(5.1, 90.0)), module, Table::FREQ_PARAM));
+		addParam(createParamCentered<GreenKnob>(mm2px(Vec(5.1, 46.0)), module, Table::POS_PARAM));
+		addParam(createParamCentered<GreenKnob>(mm2px(Vec(5.1, 68.0)), module, Table::FINE_PARAM));
+		addParam(createParamCentered<GreenKnob>(mm2px(Vec(5.1, 90.0)), module, Table::FREQ_PARAM));
 
 		// Inputs
-		addInput(createInputCentered<IlPort>(mm2px(Vec(5.1, 57.0)), module, Table::POS_INPUT));
-		addInput(createInputCentered<IlPort>(mm2px(Vec(5.1, 79.0)), module, Table::FINE_INPUT));
-		addInput(createInputCentered<IlPort>(mm2px(Vec(5.1, 101.0)), module, Table::FREQ_INPUT));
+		addInput(createInputCentered<GreenPort>(mm2px(Vec(5.1, 57.0)), module, Table::POS_INPUT));
+		addInput(createInputCentered<GreenPort>(mm2px(Vec(5.1, 79.0)), module, Table::FINE_INPUT));
+		addInput(createInputCentered<GreenPort>(mm2px(Vec(5.1, 101.0)), module, Table::FREQ_INPUT));
 
 		// Outputs
-		addOutput(createOutputCentered<IlPort>(mm2px(Vec(5.1, 112.0)), module, Table::OUTPUT));
+		addOutput(createOutputCentered<GreenPort>(mm2px(Vec(5.1, 112.0)), module, Table::OUTPUT));
 	}
 
 	void appendContextMenu(Menu* menu) override {
