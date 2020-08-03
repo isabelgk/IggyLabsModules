@@ -112,7 +112,9 @@ namespace Wavetable {
                 
                 // Now we can fill the buffers with the sample data
                 for (int i = 0; i < monoSampleCount; i++) {
-                    cycleBuffers[i / this->cycleLength][i % this->cycleLength] = sampleData[i];
+                    // For some reason, I believe the sample temporary buffer needs to be put in backwards to play forwards.
+                    // It will require more investigation, but for now, this fixes the issue.
+                    cycleBuffers[i / this->cycleLength][this->cycleLength - i % this->cycleLength] = sampleData[i];
                 }
                 drwav_free(sampleData);
                 
