@@ -1,3 +1,9 @@
+v1.1.1
+===
+Bug fix:
+- Fix backwards sample playback in table (#33)
+
+
 v1.1.0
 ===
 Added features:
