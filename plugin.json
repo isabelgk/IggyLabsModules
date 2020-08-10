@@ -38,6 +38,15 @@
       "tags": [
         "random"
       ]
+    },
+    {
+      "slug": "fizz",
+      "name": "fizz",
+      "description": "Player for .sfz sample instrument format",
+      "tags": [
+        "sampler",
+        "synth voice"
+      ]
     }
   ]
 }

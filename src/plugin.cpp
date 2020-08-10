@@ -12,6 +12,7 @@ void init(Plugin* p) {
 	// Add modules here
 	p->addModel(modelMore_ideas);
 	p->addModel(modelTable);
+	p->addModel(modelFizz);
 	p->addModel(modelSelect);
 
 	// Any other plugin initialization may go here.
