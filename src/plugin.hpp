@@ -13,3 +13,4 @@ extern Plugin* pluginInstance;
 extern Model* modelMore_ideas;
 extern Model* modelTable;
 extern Model* modelSelect;
+extern Model* modelPriceTag;
