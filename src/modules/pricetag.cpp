@@ -24,7 +24,10 @@ struct PriceTag : Module {
 };
 
 struct PriceTagWidget : ModuleWidget {
-
+    PriceTagWidget(PriceTag* module) {
+        setModule(module);
+        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/dev-background.svg")));
+    }
 };
 
 Model* modelPriceTag = createModel<PriceTag, PriceTagWidget>("pricetag");

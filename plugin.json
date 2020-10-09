@@ -38,6 +38,14 @@
       "tags": [
         "random"
       ]
+    },
+    {
+      "slug": "pricetag",
+      "name": "pricetag",
+      "description" : "How much does your Rack cost?",
+      "tags": [
+        "utility"
+      ]
     }
   ]
 }
