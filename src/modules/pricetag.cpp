@@ -3,11 +3,11 @@
 
 #include <string>
 #include "../plugin.hpp"
+#include "components.hpp"
 
 
 struct PriceTag : Module {
     enum ParamIds {
-        COMPUTE_PARAM,
         NUM_PARAMS
     };
     enum InputIds {
@@ -22,23 +22,14 @@ struct PriceTag : Module {
 
     PriceTag() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam(COMPUTE_PARAM, 0.0f, 1.0f, 0.0f, "Compute");
     }
 
-    int numParams = 0;
-    int numPorts = 0;
-    int numCables = 0;
-    int totalHP = 0;
-
-    dsp::SchmittTrigger buttonTrigger;
-
-
-    /** Get plugin info from current Rack session */
-    void getPluginInfo() {
-        numParams = 0;
-        numPorts = 0;
-        numCables = 0;
-        totalHP = 0;
+    /** Get the rack price based on number of knobs, ports, cables, and total HP */
+    void getPrice() {
+        int numParams = 0;
+        int numPorts = 0;
+        int numCables = 0;
+        int totalHP = 0;
 
         auto moduleContainer = APP->scene->rack->moduleContainer;
         for (widget::Widget* w : moduleContainer->children) {
@@ -58,28 +49,22 @@ struct PriceTag : Module {
             if (!cw->isComplete()) continue;
             numCables += 1;
         }
+
+        // This formula is arbitrarily weighted
+        return numParams * 17 + numPorts * 12 + totalHP * 20 + numCables * 2;
     }
 
-    int getPrice() {
-        return numParams * 17 + numPorts * 12 + numCables * 2 + totalHP * 20;
-    }
 
     int loopCounter = 0;
-
     void process(const ProcessArgs& args) override {
         if (loopCounter == 0) {
-            getPluginInfo();
-            DEBUG("[IGGYLABS] numParams = %d", numParams);
-            DEBUG("[IGGYLABS] numPorts = %d", numPorts);
-            DEBUG("[IGGYLABS] numCables = %d", numCables);
-            DEBUG("[IGGYLABS] Total HP = %d", totalHP);
-            DEBUG("[IGGYLABS] price = %d", getPrice());
+            getPrice();
         }
 
         loopCounter++;
-        
-        // Compute every two seconds
-        if (loopCounter > args.sampleRate * 2) {
+
+        // Compute every second
+        if (loopCounter > args.sampleRate) {
             loopCounter = 0;
         }
     }
@@ -89,11 +74,8 @@ struct PriceTag : Module {
 struct PriceTagWidget : ModuleWidget {
     PriceTagWidget(PriceTag* module) {
         setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/dev-background.svg")));
-
-        addParam(createParamCentered<LEDButton>(Vec(25, 25), module, PriceTag::COMPUTE_PARAM));	
+        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/pricetag.svg")));
     }
-
 };
 
 Model* modelPriceTag = createModel<PriceTag, PriceTagWidget>("pricetag");
