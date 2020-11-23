@@ -19,19 +19,9 @@ struct ThisRack : Module {
     enum LightIds {
         NUM_LIGHTS
     };
-    
-    int numParams = 0;
-    int numPorts = 0;
-    int numCables = 0;
-    int totalHP = 0;
-    int numModules = 0;
 
     ThisRack() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-    }
-
-    void process(const ProcessArgs& args) override {
-
     }
 
 };
@@ -40,12 +30,12 @@ struct ThisRack : Module {
 struct ThisRackTextWidget : OpaqueWidget {
     std::shared_ptr<Font> font;
     int fontSize = 24;
-    std::string text;
+    int* val = 0;
 
-    ThisRackTextWidget(int x, int y, std::string _text = "") {
+    ThisRackTextWidget(int x, int y, int* v) {
         font = APP->window->loadFont(asset::plugin(pluginInstance, "res/font/open24displaySt/Open 24 Display St.ttf"));
         box.pos = Vec(x, y);
-        text = _text;
+        val = v;
     }
 
     void draw(const DrawArgs& args) override {
@@ -58,7 +48,8 @@ struct ThisRackTextWidget : OpaqueWidget {
 
             nvgBeginPath(args.vg);
             nvgFillColor(args.vg, nvgRGB(236, 239, 241));  // Blue Grey 50 - Material color scheme
-            nvgText(args.vg, 0, 0, text.c_str(), NULL);
+            
+            nvgText(args.vg, 0, 0, std::to_string(*val).c_str(), NULL);
             nvgStroke(args.vg);
 
             bndSetFont(APP->window->uiFont->handle);
@@ -67,69 +58,68 @@ struct ThisRackTextWidget : OpaqueWidget {
 };
 
 struct ThisRackWidget : ModuleWidget {
-    ThisRack* moduleInstance;
+    int numParams = 0;
+    int numPorts = 0;
+    int numCables = 0;
+    int numModules = 0;
+    int totalHP = 0;
+    int loopCounter = 0;
+
     ThisRackWidget(ThisRack* module) {
         setModule(module);
-        moduleInstance = module;
         setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/this-rack.svg")));
-    
-        // Create and position labels
-        ThisRackTextWidget* portsLabel = new ThisRackTextWidget(37.5, 75, "0");
-        // portsLabel->text = std::to_string(moduleInstance->numPorts);
 
-        ThisRackTextWidget* paramLabel = new ThisRackTextWidget(37.5, 135, "0");
-        // paramLabel->text = std::to_string(moduleInstance->numParams);
-
-        ThisRackTextWidget* cablesLabel = new ThisRackTextWidget(37.5, 195, "0");
-        // cablesLabel->text = std::to_string(moduleInstance->numCables);
-
-        ThisRackTextWidget* hpLabel = new ThisRackTextWidget(37.5, 255, "0");
-        // hpLabel->text = std::to_string(moduleInstance->totalHP);
-
-        ThisRackTextWidget* modulesLabel = new ThisRackTextWidget(37.5, 314, "0");
-        // modulesLabel->text = std::to_string(moduleInstance->numModules);
-
+        ThisRackTextWidget* portsLabel = new ThisRackTextWidget(37.5, 75, &numPorts);
         addChild(portsLabel);
+        
+        ThisRackTextWidget* paramLabel = new ThisRackTextWidget(37.5, 135, &numParams);
         addChild(paramLabel);
+        
+        ThisRackTextWidget* cablesLabel = new ThisRackTextWidget(37.5, 195, &numCables);
         addChild(cablesLabel);
+        
+        ThisRackTextWidget* hpLabel = new ThisRackTextWidget(37.5, 255, &totalHP);
         addChild(hpLabel);
+
+        ThisRackTextWidget* modulesLabel = new ThisRackTextWidget(37.5, 314, &numModules);
         addChild(modulesLabel);
     }
 
     /** Count the number of params, ports, cables, and HP*/
     void step() override {
-        if (moduleInstance) {
-            moduleInstance->numParams = 0;
-            moduleInstance->numPorts = 0;
-            moduleInstance->numCables = 0;
-            moduleInstance->totalHP = 0;
-            moduleInstance->numModules = 0;
+        if (module) {
+            // Reset stats
+            numParams = 0;
+            numPorts = 0;
+            numCables = 0;
+            totalHP = 0;
+            numModules = 0;
 
             // Recompute values
             auto moduleContainer = APP->scene->rack->moduleContainer;
-            if (moduleContainer) {
-                for (widget::Widget* w : moduleContainer->children) {
-                    ModuleWidget* moduleWidget = dynamic_cast<ModuleWidget*>(w);
-                    if(moduleWidget) {
-                        moduleInstance->numModules++;
-                        moduleInstance->numParams += moduleWidget->params.size();
-                        moduleInstance->numPorts += moduleWidget->outputs.size() + moduleWidget->inputs.size();
-                        moduleInstance->totalHP += moduleWidget->panel->box.size.x / RACK_GRID_WIDTH;
-                    }
+            for (widget::Widget* w : moduleContainer->children) {
+                ModuleWidget* moduleWidget = dynamic_cast<ModuleWidget*>(w);
+                if (moduleWidget) {
+                    numModules++;
+                    numParams += moduleWidget->params.size();
+                    numPorts += moduleWidget->outputs.size() + moduleWidget->inputs.size();
+                    totalHP += moduleWidget->panel->box.size.x / RACK_GRID_WIDTH;
                 }
+
             }
 
             auto cableContainer = APP->scene->rack->cableContainer;
             for (widget::Widget* w : cableContainer->children) {
                 CableWidget* cw = dynamic_cast<CableWidget*>(w);
-                assert(cw);
+                if (cw) {
+                    if (!cw->isComplete()) continue;
+                    numCables += 1;
+                }
 
-                if (!cw->isComplete()) continue;
-                moduleInstance->numCables += 1;
             }
-
-            ModuleWidget::step();
         }
+
+        ModuleWidget::step();
     }
 };
 
