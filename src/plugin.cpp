@@ -10,9 +10,9 @@ void init(Plugin* p) {
 	pluginInstance = p;
 
 	// Add modules here
-	p->addModel(modelMore_ideas);
 	p->addModel(modelTable);
 	p->addModel(modelSelect);
+	p->addModel(modelMore_ideas);
 	p->addModel(modelPriceTag);
 
 	// Any other plugin initialization may go here.
