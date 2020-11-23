@@ -40,9 +40,9 @@
       ]
     },
     {
-      "slug": "pricetag",
-      "name": "pricetag",
-      "description" : "How much does your Rack cost?",
+      "slug": "this-rack",
+      "name": "this-rack",
+      "description" : "Statistics about the HP, modules, cables, ports, and params in your rack",
       "tags": [
         "utility"
       ]

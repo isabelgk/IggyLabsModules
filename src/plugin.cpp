@@ -13,7 +13,7 @@ void init(Plugin* p) {
 	p->addModel(modelTable);
 	p->addModel(modelSelect);
 	p->addModel(modelMore_ideas);
-	p->addModel(modelPriceTag);
+	p->addModel(modelThisRack);
 
 	// Any other plugin initialization may go here.
 	// As an alternative, consider lazy-loading assets and lookup tables when your module is created to reduce startup times of Rack.
