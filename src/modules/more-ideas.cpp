@@ -16,10 +16,12 @@ struct More_ideas : Module {
 		SCALE_PARAM,
 		CLOCK_OUT_PARAM,
 		QUANTIZE_PARAM,
+		RESET_PARAM,
 		NUM_PARAMS
 	};
 	enum InputIds {
 		CLOCK_INPUT,
+		RESET_INPUT,
 		RULE_INPUT,
 		SEED_INPUT,
 		LOW_INPUT,
@@ -61,6 +63,7 @@ struct More_ideas : Module {
 		configParam(SELECT_PARAM, 0.f, 7.f, 0.f, "Select");
 		configParam(CLOCK_OUT_PARAM, 0.f, 1.f, 0.f, "Clock output mode");
 		configParam(QUANTIZE_PARAM, 0.0, 1.f, 0.f, "Quantize output");
+		configParam(RESET_PARAM, 0.f, 1.f, 0.f, "Reset");
 	}
 
 	// If Initializing the plugin were to reset the raw CV range, we would
@@ -313,6 +316,14 @@ struct CyanSwitch : app::SvgSwitch {
 	}
 };
 
+struct CyanButton : app::SvgSwitch {
+	CyanButton() {
+		momentary = true;
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/cyan/button_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/widgets/cyan/button_1.svg")));
+	}
+};
+
 struct CyanKnob : RoundKnob {
 	CyanKnob() {
 		snap = true;
@@ -362,6 +373,8 @@ struct More_ideasWidget : ModuleWidget {
 		addParam(createParam<CyanSwitch>(mm2px(Vec(45.9, 106)), module, More_ideas::CLOCK_OUT_PARAM));
 		addParam(createParam<CyanSwitch>(mm2px(Vec(30.16, 106)), module, More_ideas::QUANTIZE_PARAM));
 
+		addParam(createParam<CyanButton>(mm2px(Vec(14.6, 103.3)), module, More_ideas::RESET_PARAM));
+
 		addParam(createParamCentered<CyanKnob>(mm2px(Vec(17.229, 66.425)), module, More_ideas::RULE_PARAM));
 		addParam(createParamCentered<CyanKnob>(mm2px(Vec(39.99, 66.421)), module, More_ideas::SEED_PARAM));
 		addParam(createParamCentered<CyanKnob>(mm2px(Vec(17.229, 79.201)), module, More_ideas::LOW_PARAM));
@@ -376,6 +389,7 @@ struct More_ideasWidget : ModuleWidget {
 		addInput(createInputCentered<CyanPort>(mm2px(Vec(7.428, 91.973)), module, More_ideas::SCALE_INPUT));
 		addInput(createInputCentered<CyanPort>(mm2px(Vec(30.279, 91.973)), module, More_ideas::SELECT_INPUT));
 		addInput(createInputCentered<CyanPort>(mm2px(Vec(7.428, 107.341)), module, More_ideas::CLOCK_INPUT));
+		addInput(createInputCentered<CyanPort>(mm2px(Vec(20.789, 107.341)), module, More_ideas::RESET_INPUT));
 
 		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.548, 23.84)), module, More_ideas::BIT_OUTPUTS + 0));
 		addOutput(createOutputCentered<CyanPort>(mm2px(Vec(54.548, 34.223)), module, More_ideas::BIT_OUTPUTS + 1));
