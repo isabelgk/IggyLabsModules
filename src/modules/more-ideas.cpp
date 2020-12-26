@@ -43,6 +43,7 @@ struct More_ideas : Module {
 	};
 
 	Trigger clockTrigger;
+	dsp::BooleanTrigger resetTrigger;
 	MoreIdeas::Model *stateModel = new MoreIdeas::Model();
 
 	int loopCounter = 0;
@@ -98,12 +99,11 @@ struct More_ideas : Module {
 		}
 	}
 
+	void onReset(const ProcessArgs& args) {
+		this->stateModel->onReset();
+	}
+
 	void subSampledProcess(const ProcessArgs& args) {
-
-		if (this->clockTrigger.process(inputs[CLOCK_INPUT].getVoltage())) {
-			onTrigger(args);
-		}
-
 		for (int i = 0; i < 8; i++) {
 			if (this->stateModel->generation == nullptr) {
 				outputs[BIT_OUTPUTS + i].setVoltage(clockTrigger.isHigh() && this->stateModel->seed->binaryArray[i] ? 10.f : 0.f);
@@ -200,6 +200,14 @@ struct More_ideas : Module {
 		if (loopCounter-- == 0) {
 			loopCounter = 8;
 			subSampledProcess(args);
+		}
+		
+		if (this->clockTrigger.process(inputs[CLOCK_INPUT].getVoltage())) {
+			onTrigger(args);
+		}
+
+		if (resetTrigger.process(params[RESET_PARAM].getValue() > 0.f)) {
+			onReset(args);
 		}
 	}
 

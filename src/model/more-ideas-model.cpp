@@ -240,6 +240,12 @@ namespace MoreIdeas {
                 this->rawCvOut = frac * (highCv - lowCv) + lowCv;
             }
         }
+
+        // Reset the generations
+        void onReset() {
+            this->generation = nullptr;
+            updateSeeds();
+        }
     };
 
 
