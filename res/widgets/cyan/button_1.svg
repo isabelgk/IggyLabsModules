@@ -7,38 +7,38 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   sodipodi:docname="button_1.svg"
-   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
-   id="svg1158"
+   width="3.3mm"
+   height="3.3mm"
+   viewBox="0 0 3.3 3.3"
    version="1.1"
-   viewBox="0 0 2 2"
-   height="2mm"
-   width="2mm">
+   id="svg1158"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   sodipodi:docname="button_1.svg">
   <defs
      id="defs1152" />
   <sodipodi:namedview
-     inkscape:window-maximized="1"
-     inkscape:window-y="-9"
-     inkscape:window-x="-9"
-     inkscape:window-height="1361"
-     inkscape:window-width="2560"
-     fit-margin-bottom="0"
-     fit-margin-right="0"
-     fit-margin-left="0"
-     fit-margin-top="0"
-     showgrid="false"
-     inkscape:document-rotation="0"
-     inkscape:current-layer="layer1"
-     inkscape:document-units="mm"
-     inkscape:cy="10.18917"
-     inkscape:cx="2.0952637"
-     inkscape:zoom="31.678384"
-     inkscape:pageshadow="2"
-     inkscape:pageopacity="0.0"
-     borderopacity="1.0"
-     bordercolor="#666666"
+     id="base"
      pagecolor="#ffffff"
-     id="base" />
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="31.678384"
+     inkscape:cx="4.5519613"
+     inkscape:cy="12.645898"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:window-width="2560"
+     inkscape:window-height="1361"
+     inkscape:window-x="2551"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1" />
   <metadata
      id="metadata1155">
     <rdf:RDF>
@@ -47,28 +47,21 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <g
-     transform="translate(-17.142857,-117.68452)"
-     id="layer1"
+     inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     inkscape:label="Layer 1">
+     id="layer1"
+     transform="translate(-16.492857,-117.03452)">
     <circle
-       r="0.89999998"
-       inkscape:label="light"
-       style="display:inline;fill:#e0f7fa;fill-opacity:1;stroke:#006064;stroke-width:0.1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="circle1895-3"
+       r="1.5"
+       cy="118.68452"
        cx="18.142857"
-       cy="118.68452" />
-    <ellipse
-       ry="0.78510422"
-       rx="0.80598474"
-       cy="118.76195"
-       cx="18.140944"
-       id="path1727"
-       style="fill:#bfeff5;fill-opacity:1;stroke:none;stroke-width:0.131259;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke;stop-color:#000000" />
+       id="circle1895-3"
+       style="display:inline;fill:#b2ebf2;fill-opacity:1;stroke:#006064;stroke-width:0.3;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       inkscape:label="light" />
   </g>
 </svg>

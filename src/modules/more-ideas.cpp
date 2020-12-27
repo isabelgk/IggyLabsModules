@@ -381,7 +381,7 @@ struct More_ideasWidget : ModuleWidget {
 		addParam(createParam<CyanSwitch>(mm2px(Vec(45.9, 106)), module, More_ideas::CLOCK_OUT_PARAM));
 		addParam(createParam<CyanSwitch>(mm2px(Vec(30.16, 106)), module, More_ideas::QUANTIZE_PARAM));
 
-		addParam(createParam<CyanButton>(mm2px(Vec(14.6, 103.3)), module, More_ideas::RESET_PARAM));
+		addParam(createParam<CyanButton>(mm2px(Vec(13.6, 102.85)), module, More_ideas::RESET_PARAM));
 
 		addParam(createParamCentered<CyanKnob>(mm2px(Vec(17.229, 66.425)), module, More_ideas::RULE_PARAM));
 		addParam(createParamCentered<CyanKnob>(mm2px(Vec(39.99, 66.421)), module, More_ideas::SEED_PARAM));
