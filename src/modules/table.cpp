@@ -3,11 +3,26 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <libgen.h> // for dirname and basename
 #include "../plugin.hpp"
 #include "osdialog.h"
 
 #include "../dsp/osc/wavetable.cpp"
 
+std::string filename(const std::string& path) {
+	char* pathDup = strdup(path.c_str());
+	std::string filename = basename(pathDup);
+	free(pathDup);
+	return filename;
+}
+
+
+std::string filenameBase(const std::string& filename) {
+	size_t pos = filename.rfind('.');
+	if (pos == std::string::npos)
+		return filename;
+	return std::string(filename, 0, pos);
+}
 
 struct Table : Module {
 	enum ParamIds {
@@ -49,7 +64,7 @@ struct Table : Module {
 	void loadWavetable(std::string path, int cycleLength) {
 		wavetable->clear();
 		wavetable->loadWavetable(path, cycleLength);
-		this->currentTableName = string::filenameBase(string::filename(path));
+		this->currentTableName = filenameBase(filename(path));
 	}
 
 	// Save CPU by processing certain parameters less frequently
