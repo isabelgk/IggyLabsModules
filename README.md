@@ -11,12 +11,5 @@ See the [manual](https://github.com/IggyLabs/IggyLabsModulesManual) for more inf
 
 Subscribe to the collection in the [VCV Library](https://library.vcvrack.com/?brand=iggy.labs).
 
-
-## Azure CI builds
-
-Bleeding edge builds are [available on the release page](https://github.com/IggyLabs/IggyLabsModules/releases/tag/AzureCI)
-
-Old versions are also tagged and available on the release page.
-
-## Want to support my work?
-[Buy me a coffee](https://www.buymeacoffee.com/iggylabs)
+## If you'd like...
+[Buy me a ~~coffee~~ cup of tea](https://www.buymeacoffee.com/iggylabs)
