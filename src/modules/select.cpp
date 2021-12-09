@@ -23,7 +23,7 @@ struct Select : Module {
 
 	Select() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(SELECT_PARAM, 0.f, 15.f, 0.f, "Selected");
+		configParam(SELECT_PARAM, 1.f, 16.f, 1.f, "Selected");
 	}
 
 	void slowerProcess(const ProcessArgs& args, int sel) {
@@ -38,7 +38,7 @@ struct Select : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
-		int selection = int(params[SELECT_PARAM].getValue());
+		int selection = int(params[SELECT_PARAM].getValue()) - 1;
 
 		// Update lights and check polyphony less frequently
 		if (loopCounter-- == 0) {
