@@ -299,12 +299,12 @@ struct TextDrawWidget : OpaqueWidget {
 	std::shared_ptr<Font> font;
 
 	TextDrawWidget(More_ideas* module) {
-		font = APP->window->loadFont(asset::plugin(pluginInstance, "res/font/Londrina_Solid/LondrinaSolid-Regular.ttf"));
 		this->module = module;
 	}
 
 	void draw(const DrawArgs& args) override {
 		if (!module) return;
+        font = APP->window->loadFont(asset::plugin(pluginInstance, "res/font/Londrina_Solid/LondrinaSolid-Regular.ttf"));
 		nvgFontSize(args.vg, 9);
 		nvgFontFaceId(args.vg, font->handle);
 		nvgFillColor(args.vg, nvgRGB(0, 131, 143));
