@@ -97,7 +97,7 @@ int fillTables2(WaveTableOsc *osc, double *freqWaveRe, double *freqWaveIm, int n
         // fill the table in with the needed harmonics
         for (int idx = 0; idx < numSamples; idx++)
             ar[idx] = ai[idx] = 0.0;
-        for (int idx = 1; idx <= maxHarmonic; idx++) {
+        for (unsigned int idx = 1; idx <= maxHarmonic; idx++) {
             ar[idx] = freqWaveRe[idx];
             ai[idx] = freqWaveIm[idx];
             ar[numSamples - idx] = freqWaveRe[numSamples - idx];
@@ -109,7 +109,7 @@ int fillTables2(WaveTableOsc *osc, double *freqWaveRe, double *freqWaveIm, int n
         numTables++;
 
         // topFreq is new base frequency, so figure how many harmonics will fit within maxTop
-        int temp = minTop / topFreq + 0.5;  // next table's maximum harmonic
+        unsigned int temp = minTop / topFreq + 0.5;  // next table's maximum harmonic
         maxHarmonic = temp >= maxHarmonic ? maxHarmonic - 1 : temp;
     }
     return numTables;
