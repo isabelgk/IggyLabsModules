@@ -99,7 +99,7 @@ struct More_ideas : Module {
 		}
 	}
 
-	void onReset(const ProcessArgs& args) {
+	void onReset() override {
 		this->stateModel->onReset();
 	}
 
@@ -207,7 +207,7 @@ struct More_ideas : Module {
 		}
 
 		if (resetTrigger.process(params[RESET_PARAM].getValue() > 0.f)) {
-			onReset(args);
+			onReset();
 		}
 	}
 
